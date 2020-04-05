@@ -1,0 +1,9 @@
+{
+  "name": "chat-dist-frontend",
+  "description": "Frontend proyecto materia de Tecnologíass y modelos para el desarrollo de sistemas distribuidos",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
