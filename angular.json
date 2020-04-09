@@ -119,6 +119,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "chat-dist-frontend"
+    }
+  },
+  "defaultProject": "chat-dist-frontend",
+  "cli": {
+    "analytics": "33f04f4d-32e3-4943-b216-e7cd02d8ee3e"
+  }
 }
