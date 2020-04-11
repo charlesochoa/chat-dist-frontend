@@ -10,9 +10,9 @@ import { catchError, finalize } from 'rxjs/operators';
 export class ChatService {
 
   // Develop
-  private REST_API_SERVER = "http://localhost:8080/";
+  //private REST_API_SERVER = "http://localhost:8080/";
   // Production
-  //private REST_API_SERVER = "https://chat-dist-backend.herokuapp.com/";
+  private REST_API_SERVER = "https://chat-dist-backend.herokuapp.com/";
 
   constructor(private httpClient: HttpClient) { }
 
