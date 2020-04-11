@@ -1,3 +1,28 @@
-<p style="padding: 13px;">
-    An Angular 9 example application that demonstrates how to use HttpClient to consume REST APIs
-    </p>
+<div style="padding: 13px;">
+    <div class="container">
+        <h1>Send Message</h1>
+        <form #chatForm="ngForm">
+          <div class="form-group">
+            <label for="for">From</label>
+            <input type="text" class="form-control" id="from" required [(ngModel)]="model.from" name="from">
+          </div>
+          <div class="form-group">
+            <label for="to">To</label>
+            <input type="text" class="form-control" id="to" required [(ngModel)]="model.to" name="to">
+          </div>
+          <div class="form-group">
+            <ul>
+              <li *ngFor="let message of receivedMessages">{{message}}</li>
+            </ul>
+          </div>
+          
+          <div class="form-group">
+            <label for="msg">Message</label>
+            <input type="text" class="form-control" id="msg" required [(ngModel)]="model.msg" name="msg">
+          </div>
+    
+          <button type="button" class="btn btn-success" (click)="sendMessage()">Send!</button>
+          <button type="button" class="btn btn-success" (click)="receiveMessage()">Check New messages</button>
+        </form>
+    </div>
+</div>
