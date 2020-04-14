@@ -3,6 +3,7 @@ import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http'
 import { Message } from './message';
 import { throwError } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
+import { User } from './user';
 
 @Injectable({
   providedIn: 'root'
@@ -31,24 +32,31 @@ export class ChatService {
     return throwError(errorMessage);
   }
 
+  public signUp(user: User)
+  {
+    var res = this.httpClient.post(this.REST_API_SERVER + "user/signup?name=" + user.name + "&email=" + user.email,null).pipe(catchError(this.handleError));
+    return res;
+  }
 
 
-  public sendGetRequest(){
-    console.log("sendGetRequest in service");
-    var res = this.httpClient.get(this.REST_API_SERVER).pipe(catchError(this.handleError));
+  // public sendGetRequest(){
+  //   console.log("sendGetRequest in service");
+  //   var res = this.httpClient.get(this.REST_API_SERVER).pipe(catchError(this.handleError));
+  //   return res;
+  // }
+
+
+  public sendMessage(from: String, to: String, msg: String)
+  {
+    var res = this.httpClient.get(this.REST_API_SERVER + "send?from=" + from +
+                                   "&to=" + to + "&msg=" + msg);
     console.log(res);
     return res;
   }
 
 
-  public sendMessage(message: Message){
-    var res = this.httpClient.get(this.REST_API_SERVER + "send?from=" +message.from +"&to=" + message.to+"&msg=" +message.msg);
-    console.log(res);
-    return res;
-  }
-
-
-  public receiveMessage(me: String){
+  public receiveMessage(me: String)
+  {
     var res = this.httpClient.get(this.REST_API_SERVER + "receive?me=" +me);
     console.log(res);
     return res;

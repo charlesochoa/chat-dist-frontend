@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ChatService } from '../chat.service';
 import { Message }    from '../message';
+import { User } from '../user';
 
 
 @Component({
@@ -12,8 +13,14 @@ export class ChatComponent implements OnInit {
 
   response = "";
   content = "";
-  model = new Message(1,"","","");
+  name = "";
+  email = "";
+  from = "";
+  to = "";
+  msg = "";
+  canSend = false;
   receivedMessages = []
+  contacts = []
   onSubmit() 
   {
   }
@@ -28,25 +35,32 @@ export class ChatComponent implements OnInit {
   sendMessage(): void
   {
     console.log("sendingmessage in controller");
-    this.chatService.sendMessage(this.model).subscribe((data: Message)=>{
+    this.chatService.sendMessage(this.from,this.to,this.msg).subscribe((data: any)=>{
       console.log(data);
-      this.receivedMessages.push(data.from + ": " + data.msg);
-      this.model.msg = "";
+      this.receivedMessages.push(this.from + ": " + this.msg);
+      this.msg = "";
+    })  
+    
+  }
+  
+  sign(): void
+  {
+    console.log("sendingmessage in controller");
+    this.chatService.signUp(new User(0,this.name,this.email,"")).subscribe((data: any[])=>{
+      console.log(data);
+      this.contacts = data
+      this.from = this.name;
+      this.canSend = true;
     })  
     
   }
 
   receiveMessage(): void
   {
-    this.chatService.receiveMessage(this.model.from).subscribe((data: Message)=>{
+    this.chatService.receiveMessage(this.from).subscribe((data: any)=>{
       this.receivedMessages.push(data.msg);
       console.log(data);
-      this.model.msg = "";
+      this.msg = "";
     })  
   }
-  get diagnostic() 
-  { 
-    return JSON.stringify(this.model); 
-  }
-
 }
