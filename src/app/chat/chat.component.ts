@@ -11,56 +11,37 @@ import { User } from '../user';
 })
 export class ChatComponent implements OnInit {
 
-  response = "";
-  content = "";
-  name = "";
-  email = "";
-  from = "";
-  to = "";
-  msg = "";
-  canSend = false;
-  receivedMessages = []
-  contacts = []
-  onSubmit() 
-  {
+  chatService: ChatService;
+  greeting = "asdfasdf";
+  msgs = [];
+  username: string;
+  password: string;
+  credentials: Message;
+  disconnected= true;
+  connected=false;
+  newMessage : string;
+  ngOnInit() {
+    this.chatService = new ChatService(this);
   }
 
-  constructor(private chatService: ChatService) { }
-
-
-  ngOnInit(): void 
-  {
+  connect(){
+    this.chatService._connect(new Message(this.username,"",this.password));
+    this.connected = true;
+    this.disconnected = false;
   }
 
-  sendMessage(): void
-  {
-    console.log("sendingmessage in controller");
-    this.chatService.sendMessage(this.from,this.to,this.msg).subscribe((data: any)=>{
-      console.log(data);
-      this.receivedMessages.push(this.from + ": " + this.msg);
-      this.msg = "";
-    })  
-    
+  disconnect(){
+    this.chatService._disconnect();
+    this.connected = false;
+    this.disconnected = true;
+  }
+
+  sendMessage(){
+    this.chatService._send(new Message(this.username,"",this.password));
+  }
+
+  handleMessage(message: Message){
+    this.msgs.push(message);
   }
   
-  sign(): void
-  {
-    console.log("sendingmessage in controller");
-    this.chatService.signUp(new User(0,this.name,this.email,"")).subscribe((data: any[])=>{
-      console.log(data);
-      this.contacts = data
-      this.from = this.name;
-      this.canSend = true;
-    })  
-    
-  }
-
-  receiveMessage(): void
-  {
-    this.chatService.receiveMessage(this.from).subscribe((data: any)=>{
-      this.receivedMessages.push(data.msg);
-      console.log(data);
-      this.msg = "";
-    })  
-  }
 }

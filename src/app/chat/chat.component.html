@@ -1,40 +1,52 @@
 <div style="padding: 13px;">
     <div class="container">
-        <h1>Send Message</h1>
+      <h1 *ngIf="disconnected" >Login</h1>
+      <h1 *ngIf="connected" >Chats</h1>
         
         <form #chatForm="ngForm">
-          <div class="form-group">
-            <label for="for">Name</label>
-            <input type="text" class="form-control" id="name" required [(ngModel)]="name" name="name2">
+          <div class="form-group ">
+            <div class="row">
+              <div *ngIf="disconnected" class="col-sm-3" >
+                <div class="row">
+                  <input type="text" placeholder="Username" class="form-control" id="name" required [(ngModel)]="username" name="username">
+                </div>
+                <div class="row top5">
+                  <input type="password" placeholder="Password" class="form-control" id="email" required [(ngModel)]="password" name="password">
+                </div>
+              </div>
+              <div *ngIf="connected" class="col-sm-3" >
+                <div class="row">
+                  <label for="to">Bienvenido {{username}}</label>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <button type="button" *ngIf="disconnected" class="btn btn-success col-sm-12" (click)="connect()">Connect!</button>
+                <button type="button" *ngIf="connected" class="btn btn-danger col-sm-12" (click)="disconnect()">Disconnect!</button>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="for">Email</label>
-            <input type="text" class="form-control" id="email" required [(ngModel)]="email" name="email2">
-          </div>
-          <button type="button" class="btn btn-success" (click)="sign()">Signup!</button>
         </form>
-        <form #chatForm="ngForm">
-          <div class="form-group">
-            <label for="for">From</label>
-            <input type="text" class="form-control" id="from" required [(ngModel)]="from" name="from2">
+        <div class="row">
+          <div *ngIf="connected" class="col-sm-3" ></div>
+          <div *ngIf="connected" class="col-sm-9" >
+
+            <form #chatForm="ngForm">
+              <div class="form-group">
+                <label for="to">To</label>
+                <input type="text" class="form-control" id="to2" required>
+              </div>
+              <div class="form-group">
+                <ul>
+                  <li *ngFor="let message of msgs"><span>{{message.from}}: </span> {{message.msg}}</li>
+                </ul>
+              </div>
+              
+              <div class="form-group">
+                <label for="msg">Bienvenido {{greeting}}</label>
+              </div>
+              <button type="button" class="btn btn-success" (click)="sendMessage()">Send!</button>
+            </form>
           </div>
-          <div class="form-group">
-            <label for="to">To</label>
-            <input type="text" class="form-control" id="to2" required [(ngModel)]="to" name="to2">
-          </div>
-          <div class="form-group">
-            <ul>
-              <li *ngFor="let message of receivedMessages">{{message}}</li>
-            </ul>
-          </div>
-          
-          <div class="form-group">
-            <label for="msg">Message</label>
-            <input type="text" class="form-control" id="msg" required [(ngModel)]="msg" name="msg2">
-          </div>
-    
-          <button type="button" class="btn btn-success" (click)="sendMessage()">Send!</button>
-          <button type="button" class="btn btn-success" (click)="receiveMessage()">Check New messages</button>
-        </form>
+        </div>
     </div>
 </div>
