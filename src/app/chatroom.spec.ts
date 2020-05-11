@@ -1,7 +1,7 @@
-import { ChatRoom } from './chat-room';
+import { Chatroom } from './chatroom';
 
 describe('ChatRoom', () => {
   it('should create an instance', () => {
-    expect(new ChatRoom()).toBeTruthy();
+    expect(new Chatroom()).toBeTruthy();
   });
 });

@@ -11,7 +11,7 @@
                   <input type="text" placeholder="Username" class="form-control" id="name" required [(ngModel)]="username" name="username">
                 </div>
                 <div class="row top5">
-                  <input type="password" placeholder="Password" class="form-control" id="email" required [(ngModel)]="password" name="password">
+                  <input type="password" placeholder="Password" class="form-control" id="password" required [(ngModel)]="password" name="password">
                 </div>
               </div>
               <div *ngIf="connected" class="col-sm-3" >
@@ -19,34 +19,37 @@
                   <label for="to">Bienvenido {{username}}</label>
                 </div>
               </div>
-              <div class="col-sm-3">
-                <button type="button" *ngIf="disconnected" class="btn btn-success col-sm-12" (click)="connect()">Connect!</button>
-                <button type="button" *ngIf="connected" class="btn btn-danger col-sm-12" (click)="disconnect()">Disconnect!</button>
+              <div class="col-sm-2">
+                <button type="button" *ngIf="disconnected" class="btn btn-warning col-sm-12" (click)="login()">Ingresa</button>
+                <button type="button" *ngIf="disconnected" class="btn btn-info col-sm-12" (click)="sign_up()">Regístrate</button>
+                <button type="button" *ngIf="connected" class="btn btn-danger col-sm-12" (click)="disconnect()">Desconectar</button>
               </div>
             </div>
           </div>
         </form>
         <div class="row">
-          <div *ngIf="connected" class="col-sm-3" ></div>
+          <div *ngIf="connected" class="col-sm-3" >
+              <button *ngFor="let contact of contacts"  class="btn btn-info col-sm-12" (click)="changeChat(contact)">{{contact.username}}</button>
+            
+          </div>
           <div *ngIf="connected" class="col-sm-9" >
 
             <form #chatForm="ngForm">
               <div class="form-group">
-                <label for="to">To</label>
-                <input type="text" class="form-control" id="to2" required>
+                <label for="to">To: {{receiver.username}}</label>
               </div>
               <div class="form-group">
                 <ul>
-                  <li *ngFor="let message of msgs"><span>{{message.from}}: </span> {{message.msg}}</li>
+                  <li *ngFor="let message of msgs"><span>[dsadasdfa] {{message.sender.username}}: </span> {{message.content}}</li>
                 </ul>
               </div>
-              
               <div class="form-group">
-                <label for="msg">Bienvenido {{greeting}}</label>
+                <input type="text" placeholder="Write a message" class="form-control" id="name" required [(ngModel)]="newMessage" name="newMessage">
               </div>
-              <button type="button" class="btn btn-success" (click)="sendMessage()">Send!</button>
+              
+              <button *ngIf="receiver.username!='' " type="button" class="btn btn-success" (click)="sendMessage()">Send!</button>
             </form>
           </div>
         </div>
     </div>
-</div>
+</div>  

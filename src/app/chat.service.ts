@@ -3,43 +3,48 @@ import * as SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
 import { ChatComponent } from './chat/chat.component';
 import { Message } from './message';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { User } from './user';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
+import { ConfigService } from './config/config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
 
-  // Developº
-  private API_SERVER = 'http://localhost:8080/ws';
-  topic: string = "/topic/chat";
+  config = new ConfigService();
   stompClient: any;
   credentials: any;
   chatComponent: ChatComponent;
-  // Production
-  //private API_SERVER = "https://chat-dist-backend.herokuapp.com/ws";
+  token: string;
 
   constructor(chatComponent: ChatComponent){
       this.chatComponent = chatComponent;
   }
 
-
-  _connect(credentials) {
+  _connect(user: User) {
     console.log("Initialize WebSocket Connection");
-    let ws = new SockJS(this.API_SERVER);
+    let ws = new SockJS(this.config.WS_SERVER);
     this.stompClient = Stomp.over(ws);
     const _this = this;
-    _this.stompClient.connect({}, function (frame) {
-        _this.stompClient.subscribe(_this.topic + credentials.from, function (sdkEvent) {
+    _this.stompClient.connect({"Authorization": this.token}, function (frame) {
+        _this.stompClient.subscribe(_this.config.topic + user.username, function (sdkEvent) {
             _this.onMessageReceived(sdkEvent.body);
         }); 
-        _this.credentials = credentials;
-        _this.stompClient.send("/app/chat-receive", {}, JSON.stringify(this.credentials));
+        _this._listen(user);
+        
     }, this.errorCallBack);
   };
 
-  _listen(credentials) {
-    this.stompClient.send("/app/chat-receive", {}, JSON.stringify(credentials));
+  
+  set_authorization(token: string) {
+    this.config.set_authorization(token);
+  }
 
+  set_token(token: string){
+    this.token = token;
   }
 
   _disconnect() {
@@ -56,7 +61,6 @@ export class ChatService {
   errorCallBack(error) {
       console.log("errorCallBack -> " + error)
       setTimeout(() => {
-          this._connect(this.credentials);
       }, 5000);
   }
 
@@ -64,15 +68,27 @@ export class ChatService {
   * Send message to sever via web socket
   * @param {*} message 
   */
-  _send(message) {
-      this.stompClient.send("/app/chat-send", {}, JSON.stringify(message));
-  }
+ _send(message) {
+  this.stompClient.send("/app/chat-send", {}, JSON.stringify(message));
+}
 
-  onMessageReceived(body) {
+/**
+* Send message to sever via web socket
+* @param {*} message 
+*/
+_listen(user) {
+    this.stompClient.send("/app/chat-receive", {}, JSON.stringify(user));
+}
+
+  onMessageReceived(body: string) {
       var message: Message = JSON.parse(body);
-      console.log("Message Recieved from Server :: " + message.msg);
+      console.log("Message Received from Server :: " + message);
       this.chatComponent.handleMessage(message);
   }
+
+
+
+
 }
 
   
