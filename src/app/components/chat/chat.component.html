@@ -29,19 +29,17 @@
         </form>
         <div class="row">
           <div *ngIf="connected" class="col-sm-3" >
-              <button *ngFor="let contact of contacts"  class="btn btn-info col-sm-12" (click)="changeChat(contact)">{{contact.username}}</button>
+              <button *ngFor="let chat of session.chats"  class="btn btn-info col-sm-12" (click)="changeChat(chat)">{{chat.contact.username}}</button>
             
           </div>
           <div *ngIf="connected" class="col-sm-9" >
 
             <form #chatForm="ngForm">
               <div class="form-group">
-                <label for="to">To: {{receiver.username}}</label>
+                <label for="to">To: {{chat.contact.username}}</label>
               </div>
               <div class="form-group">
-                <ul>
-                  <li *ngFor="let message of msgs"><span>[dsadasdfa] {{message.sender.username}}: </span> {{message.content}}</li>
-                </ul>
+              <p *ngFor="let message of chat.messages"><span>[{{message.time| date :  "dd-MM-y h:m" }}] {{message.sender.username}}: </span> {{message.content}}</p>
               </div>
               <div class="form-group">
                 <input type="text" placeholder="Write a message" class="form-control" id="name" required [(ngModel)]="newMessage" name="newMessage">

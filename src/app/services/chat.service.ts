@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
-import { ChatComponent } from '../chat/chat.component';
+import { ChatComponent } from '../components/chat/chat.component';
 import { Message } from '../models/message';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { User } from '../models/user';
@@ -69,7 +69,9 @@ export class ChatService {
   * @param {*} message 
   */
  _send(message) {
-  this.stompClient.send("/app/chat-send", {}, JSON.stringify(message));
+  console.log("JSON.stringify(message)");
+  console.log(JSON.stringify(message));
+  this.stompClient.send("/app/chat-send", this.config.httpOptions, JSON.stringify(message));
 }
 
 /**

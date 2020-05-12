@@ -32,6 +32,17 @@ export class UserService {
     this.config.set_authorization(token);
   }
 
+  get_all_direct_messages(user: User){
+    console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(user));
+    return this.httpClient.get(this.config.DIR_MESSAGE_CTRL + "all/" + user.id,this.config.httpOptions);
+  }
+
+
+  get_all_chatrooms(user: User){
+    console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(user));
+    return this.httpClient.get(this.config.CHATROOM_CTRL + "all/" + user.id,this.config.httpOptions);
+  }
+
 
   set_token(token: string){
     this.token = token;

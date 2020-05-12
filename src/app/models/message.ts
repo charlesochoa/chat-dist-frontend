@@ -7,9 +7,10 @@ export class Message {
       public sender: User,
       public time: number,
       public content: string,
-      public isFile: boolean,
+      public text: boolean,
       public receiver: User,
       public chatroom: Chatroom,
+      public file: string,
 
     ) {  }
 }

@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { ChatService } from '../services/chat.service';
-import { Message }    from '../models/message';
-import { User } from '../models/user';
-import { UserService } from '../services/user.service';
-import { Credentials } from '../models/credentials';
+import { ChatService } from '../../services/chat.service';
+import { Message }    from '../../models/message';
+import { User } from '../../models/user';
+import { UserService } from '../../services/user.service';
+import { Credentials } from '../../models/credentials';
 import { Timestamp } from 'rxjs/internal/operators/timestamp';
 import { HttpResponse } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { Session } from '../../models/session';
+import { Chat } from 'src/app/models/chat';
 
 
 @Component({
@@ -16,25 +18,24 @@ import { map } from 'rxjs/operators';
 })
 export class ChatComponent implements OnInit {
 
+  session: Session;
   chatService: ChatService;
-  allMsgs = [];
+  chat = new Chat(new User(null,"","","",""),null,null,[]);
   msgs = [];
   username= "inseguro1";
-  // username= "gabriel";
   password = "12345";
   credentials: Credentials;
   disconnected= true;
   connected=false;
   newMessage : string;
   result: User;
-  contacts: User[];
   receiver = new User(0,"","","","");
   user: User;
   token = "";
 
   constructor(private userService: UserService)
   {
-
+    this.session = new Session("",[]);
   }
   ngOnInit() {
     this.chatService = new ChatService(this);
@@ -54,7 +55,7 @@ export class ChatComponent implements OnInit {
   {
     this.credentials = new Credentials(this.username,this.password);
     this.userService.login(this.credentials)
-    .subscribe(response => {
+    .subscribe((response: User[]) => {
       console.log(response);
       if(response!=null) {
         // this.token = response["Authorization"];
@@ -63,13 +64,25 @@ export class ChatComponent implements OnInit {
         // this.chatService.set_authorization(this.token);
         // this.userService.set_authorization(this.token);
         
-        this.contacts = response;
-        this.contacts.forEach(contact => {
+        response.forEach(contact => {
           if(contact.username == this.credentials.username){
             this.user = contact;
-            this.contacts.splice(this.contacts.indexOf(contact),1);
+          } else {
+            this.session.chats.push(new Chat(contact,null,false,[]));
           }
         })
+        this.userService.get_all_direct_messages(this.user).subscribe((allDirMessages: Message[]) => {
+          console.log("allDirMessages");
+          console.log(allDirMessages);
+          allDirMessages.forEach(m => {
+            this.session.chats.forEach(c => {
+              if(c.contact.username == m.receiver.username || c.contact.username == m.sender.username)
+              {
+                c.messages.push(m);
+              }
+            })
+          })
+        });
         this.chatService._connect(this.user);
         this.connected = true;
         this.disconnected = false;
@@ -79,23 +92,37 @@ export class ChatComponent implements OnInit {
 
   }
 
-  changeChat(contact: User)
+  getContactMessages(contact: User){
+    this.session.chats.forEach(c => {
+      if(c.contact.username == contact.username){
+        return c.messages;
+      }
+    })
+  }
+
+  changeChat(chat: Chat)
   {
-    console.log(contact);
-    this.receiver = contact;
-    this.msgs = [];
+    console.log(chat);
+    this.receiver = chat.contact;
+    this.chat = chat;
     this.newMessage = "";
   }
 
   disconnect(){
     this.chatService._disconnect();
+    this.session = null;
     this.connected = false;
     this.disconnected = true;
   }
 
   sendMessage(){
-    this.chatService._send(new Message(0,this.user,0,this.newMessage,false,this.receiver,null));
-    this.msgs.push(new Message(0,this.user,0,this.newMessage,false,this.receiver,null));
+    var date = new Date();
+    console.log(date.getTime());
+    var newDirect = new Message(null,this.user,date.getTime(),this.newMessage,true,this.receiver,null,null);
+    console.log("newDirect");
+    console.log(newDirect);
+    this.chatService._send(newDirect);
+    this.msgs.push(newDirect);
     this.newMessage = "";
   }
 
