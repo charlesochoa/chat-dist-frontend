@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ChatService } from '../chat.service';
-import { Message }    from '../message';
-import { User } from '../user';
-import { UserService } from '../user.service';
-import { Credentials } from '../credentials';
+import { ChatService } from '../services/chat.service';
+import { Message }    from '../models/message';
+import { User } from '../models/user';
+import { UserService } from '../services/user.service';
+import { Credentials } from '../models/credentials';
 import { Timestamp } from 'rxjs/internal/operators/timestamp';
 import { HttpResponse } from '@angular/common/http';
 import { map } from 'rxjs/operators';

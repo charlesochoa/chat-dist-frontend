@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import * as SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
-import { ChatComponent } from './chat/chat.component';
-import { Message } from './message';
+import { ChatComponent } from '../chat/chat.component';
+import { Message } from '../models/message';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { User } from './user';
+import { User } from '../models/user';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
-import { ConfigService } from './config/config.service';
+import { ConfigService } from '../config/config.service';
 
 @Injectable({
   providedIn: 'root'
