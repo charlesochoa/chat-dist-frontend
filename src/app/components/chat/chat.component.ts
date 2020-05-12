@@ -9,6 +9,8 @@ import { HttpResponse } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Session } from '../../models/session';
 import { Chat } from 'src/app/models/chat';
+import { NotificationService } from 'src/app/services/notification.service';
+import { Chatroom } from 'src/app/models/chatroom';
 
 
 @Component({
@@ -20,22 +22,32 @@ export class ChatComponent implements OnInit {
 
   session: Session;
   chatService: ChatService;
-  chat = new Chat(new User(null,"","","",""),null,null,[]);
-  msgs = [];
-  username= "inseguro1";
-  password = "12345";
+  chat: Chat;
   credentials: Credentials;
-  disconnected= true;
-  connected=false;
   newMessage : string;
   result: User;
-  receiver = new User(0,"","","","");
   user: User;
-  token = "";
+  newChatroomName: string;
+  token: string;
+  password: string;
+  receiver: User;
+  disconnected: boolean;
+  connected: boolean;
+  addingChatroom: boolean;
+  username: string;
 
-  constructor(private userService: UserService)
+  constructor(private userService: UserService, private notificationService: NotificationService)
   {
     this.session = new Session("",[]);
+    this.chat = new Chat(new User(null,"","","",""),null,null,[]);
+    this.receiver = new User(0,"","","","");
+    this.disconnected= true;
+    this.connected=false;
+    this.addingChatroom = false;
+    this.username= "inseguro1";
+    this.password = "12345";
+    this.token = "";
+    this.newChatroomName = "";
   }
   ngOnInit() {
     this.chatService = new ChatService(this);
@@ -43,39 +55,46 @@ export class ChatComponent implements OnInit {
 
   sign_up()
   {
-    this.userService.sign_up(new User(0,this.username,"",this.password,"")).subscribe((data: User) => {
+    this.userService.sign_up(new User(0,this.username,"",this.password,"")).subscribe((data: User) => 
+    {
       this.result = data;
       console.log(this.result);
 
     })
   }
 
-  login() 
-  
+  login()
   {
     this.credentials = new Credentials(this.username,this.password);
     this.userService.login(this.credentials)
-    .subscribe((response: User[]) => {
+    .subscribe((response: User[]) => 
+    {
       console.log(response);
-      if(response!=null) {
+      if(response!=null) 
+      {
         // this.token = response["Authorization"];
         // this.chatService.set_token(this.token);
         // this.userService.set_token(this.token);
         // this.chatService.set_authorization(this.token);
         // this.userService.set_authorization(this.token);
         
-        response.forEach(contact => {
-          if(contact.username == this.credentials.username){
+        response.forEach((contact: User) => 
+        {
+          if(contact.username == this.credentials.username)
+          {
             this.user = contact;
           } else {
             this.session.chats.push(new Chat(contact,null,false,[]));
           }
         })
-        this.userService.get_all_direct_messages(this.user).subscribe((allDirMessages: Message[]) => {
-          console.log("allDirMessages");
-          console.log(allDirMessages);
-          allDirMessages.forEach(m => {
-            this.session.chats.forEach(c => {
+        this.userService.get_all_direct_messages(this.user).subscribe((allDirMessages: Message[]) => 
+        {
+          // console.log("allDirMessages");
+          // console.log(allDirMessages);
+          allDirMessages.forEach(m => 
+          {
+            this.session.chats.forEach(c => 
+            {
               if(c.contact.username == m.receiver.username || c.contact.username == m.sender.username)
               {
                 c.messages.push(m);
@@ -83,6 +102,13 @@ export class ChatComponent implements OnInit {
             })
           })
         });
+        this.userService.get_all_chatrooms(this.user).subscribe((chatrooms: Chatroom[]) => 
+        {
+          chatrooms.forEach((chatroom: Chatroom) => 
+          {
+              this.session.chats.push(new Chat(null,chatroom,true,[]));
+          })
+        })
         this.chatService._connect(this.user);
         this.connected = true;
         this.disconnected = false;
@@ -92,43 +118,75 @@ export class ChatComponent implements OnInit {
 
   }
 
-  getContactMessages(contact: User){
-    this.session.chats.forEach(c => {
-      if(c.contact.username == contact.username){
-        return c.messages;
-      }
-    })
+  addNewChat()
+  {
+    this.addingChatroom = true;
+  }
+
+  createNewGroup()
+  {
+    console.log("TODO: Going to create: ");
+    console.log(new Chatroom(null,this.user,null,this.newChatroomName));
+  }
+
+  getContactMessages(contact: User)
+  {
+    if (this.session != null)
+    {
+      this.session.chats.forEach(c => 
+      {
+        if(c.contact.username == contact.username){
+          return c.messages;
+        }
+      })
+    }
+    
   }
 
   changeChat(chat: Chat)
   {
-    console.log(chat);
+    // console.log(chat);
     this.receiver = chat.contact;
     this.chat = chat;
     this.newMessage = "";
   }
 
-  disconnect(){
+  disconnect()
+  {
     this.chatService._disconnect();
-    this.session = null;
+    this.session = new Session("",[]);
     this.connected = false;
     this.disconnected = true;
   }
 
-  sendMessage(){
+  sendMessage()
+  {
     var date = new Date();
-    console.log(date.getTime());
+    // console.log(date.getTime());
     var newDirect = new Message(null,this.user,date.getTime(),this.newMessage,true,this.receiver,null,null);
-    console.log("newDirect");
-    console.log(newDirect);
+    // console.log("newDirect");
+    // console.log(newDirect);
     this.chatService._send(newDirect);
-    this.msgs.push(newDirect);
+    this.chat.messages.push(newDirect);
     this.newMessage = "";
   }
 
-  handleMessage(message: Message){
+  handleMessage(message: Message)
+  {
     console.log(message);
-    this.msgs.push(message);
+    // this.notificationService.showSuccess("hola", "prueba");
+    
+    if(message.receiver!= null)
+    {
+      this.session.chats.forEach(c => 
+      {
+        if(c.contact.username == message.sender.username)
+        {
+          c.messages.push(message);
+        }
+        
+      })
+    }
   }
   
 }
