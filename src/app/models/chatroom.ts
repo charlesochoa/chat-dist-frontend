@@ -6,5 +6,6 @@ export class Chatroom {
         public admin: User,
         public bindingName: string,
         public name: string,
+        public users: User[],
       ) {  }
 }

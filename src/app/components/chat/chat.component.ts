@@ -31,6 +31,8 @@ export class ChatComponent implements OnInit {
   token: string;
   password: string;
   receiver: User;
+  chatTitle: string;
+  chatMessages: Message[];
   disconnected: boolean;
   connected: boolean;
   addingChatroom: boolean;
@@ -38,7 +40,9 @@ export class ChatComponent implements OnInit {
 
   constructor(private userService: UserService, private notificationService: NotificationService)
   {
-    this.session = new Session("",[]);
+    this.session = new Session("",[],[]);
+    this.chatTitle= "";
+    this.chatMessages= [];
     this.chat = new Chat(new User(null,"","","",""),null,null,[]);
     this.receiver = new User(0,"","","","");
     this.disconnected= true;
@@ -55,126 +59,224 @@ export class ChatComponent implements OnInit {
 
   sign_up()
   {
-    this.userService.sign_up(new User(0,this.username,"",this.password,"")).subscribe((data: User) => 
+    this.userService.sign_up(new User(null,this.username,null,this.password,null)).subscribe((data: User) => 
     {
       this.result = data;
       console.log(this.result);
 
     })
   }
-
   login()
   {
-    this.credentials = new Credentials(this.username,this.password);
-    this.userService.login(this.credentials)
-    .subscribe((response: User[]) => 
-    {
-      console.log(response);
-      if(response!=null) 
+    if(this.password!= "" && this.username!=""){
+      this.credentials = new Credentials(this.username,this.password);
+      this.userService.login(this.credentials)
+      .subscribe((response: User) => 
       {
-        // this.token = response["Authorization"];
-        // this.chatService.set_token(this.token);
-        // this.userService.set_token(this.token);
-        // this.chatService.set_authorization(this.token);
-        // this.userService.set_authorization(this.token);
-        
-        response.forEach((contact: User) => 
+        console.log(response);
+        if(response!=null) 
         {
-          if(contact.username == this.credentials.username)
+          // this.token = response["Authorization"];
+          // this.chatService.set_token(this.token);
+          // this.userService.set_token(this.token);
+          // this.chatService.set_authorization(this.token);
+          // this.userService.set_authorization(this.token);
+          this.user = response;
+          this.loadDirectChats();
+          this.loadGroups();
+          this.chatService._connect(this.user);
+          this.connected = true;
+          this.disconnected = false;
+        }
+
+      });
+    } else {
+      this.notificationService.showError("Los campos no deben estar vacíos", "Error de ingreso");
+    }
+  }
+  logout()
+  {
+    this.chatService._disconnect();
+    
+    this.session = new Session("",[],[]);
+    this.chatTitle= "";
+    this.chatMessages= [];
+    this.chat = new Chat(null,null,null,[]);
+    this.receiver = new User(0,"","","","");
+    this.disconnected= true;
+    this.connected=false;
+    this.addingChatroom = false;
+    this.token = "";
+    this.newChatroomName = "";
+    this.connected = false;
+    this.disconnected = true;
+  }
+// ---------- LOADING SESSION -------------- START
+  loadDirectChats()
+  {
+    this.userService.get_all_users().subscribe((cs: User[]) => 
+    {
+      console.log("LoadContacts Response:");
+      console.log(cs);
+      cs.forEach((c: User) =>
+      {
+        if(c.username != this.credentials.username)
+        {
+          this.session.chats.push(new Chat(c,null,false,[]));
+        }
+      })
+      this.loadDirectMessages();
+    })
+  }
+  loadDirectMessages()
+  {
+    this.userService.get_all_direct_messages(this.user).subscribe((allDirMessages: Message[]) => 
+    {
+      // console.log("allDirMessages");
+      // console.log(allDirMessages);
+      allDirMessages.forEach(m => 
+      {
+        this.session.chats.forEach(c => 
+        {
+          if(c.contact.username == m.receiver.username || c.contact.username == m.sender.username)
           {
-            this.user = contact;
-          } else {
-            this.session.chats.push(new Chat(contact,null,false,[]));
+            c.messages.push(m);
           }
         })
-        this.userService.get_all_direct_messages(this.user).subscribe((allDirMessages: Message[]) => 
-        {
-          // console.log("allDirMessages");
-          // console.log(allDirMessages);
-          allDirMessages.forEach(m => 
-          {
-            this.session.chats.forEach(c => 
-            {
-              if(c.contact.username == m.receiver.username || c.contact.username == m.sender.username)
-              {
-                c.messages.push(m);
-              }
-            })
-          })
-        });
-        this.userService.get_all_chatrooms(this.user).subscribe((chatrooms: Chatroom[]) => 
-        {
-          chatrooms.forEach((chatroom: Chatroom) => 
-          {
-              this.session.chats.push(new Chat(null,chatroom,true,[]));
-          })
-        })
-        this.chatService._connect(this.user);
-        this.connected = true;
-        this.disconnected = false;
-
-      }
+      })
     });
-
   }
+  loadGroups()
+  {
+    this.userService.get_all_chatrooms(this.user).subscribe((chatrooms: any) => 
+    {
+      console.log("chatrooms:");
+      console.log(chatrooms);
+      chatrooms.forEach((chatroom: Chatroom) => 
+      {
+          this.session.groups.push(new Chat(null,chatroom,true,[]));
+      })
+      console.log("this.session.groups");
+      console.log(this.session.groups);
+      
+      this.loadGroupMessages();
+
+    })
+  }
+  loadGroupMessages()
+  {
+    this.session.groups.forEach((g: Chat) =>
+    {
+      this.userService.get_all_group_messages(g.chatroom).subscribe((gmgs: Message[]) =>
+      {
+        g.messages = gmgs;
+      })
+    })
+  }
+// ---------- LOADING SESSION -------------- END
+
+
+  changeChat(chat: Chat)
+  {
+    console.log(chat);
+    if(chat.isGroup)
+    {
+      this.chatTitle = "Group: " + chat.chatroom.name;
+    } else 
+    {
+      this.chatTitle = "To: " + chat.contact.username;
+
+    }
+    console.log(this.chatTitle);
+    this.chat = chat
+    this.chatMessages = chat.messages;
+    this.newMessage = "";
+  }
+
+  sendMessage()
+  {
+    console.log("Trying to send a message");
+    if(this.newMessage!=""){
+
+      var date = new Date();
+      if(this.chat.isGroup)
+      {
+        var newGroup = new Message(null,this.user,date.getTime(),this.newMessage,true,null,this.chat.chatroom,null);
+        console.log("Trying to send message to group:");
+        console.log(newGroup);
+        this.userService.send_group_message(newGroup).subscribe(r => {
+          console.log(r);
+        })
+        this.chat.messages.push(newGroup);
+        this.newMessage = "";
+      } else 
+      {
+        var newDirect = new Message(null,this.user,date.getTime(),this.newMessage,true,this.chat.contact,null,null);
+        this.userService.send_direct_message(newDirect).subscribe(r => {
+          console.log(r);
+        })
+        this.chat.messages.push(newDirect);
+        this.newMessage = "";
+      }
+      // this.changeChat(this.chat);
+      // console.log(date.getTime());
+      
+      // console.log("newDirect");
+      // console.log(newDirect);
+    }
+    
+  }
+
+
 
   addNewChat()
   {
     this.addingChatroom = true;
   }
 
+  cancelAddNewChat()
+  {
+    this.addingChatroom = false;
+  }
+
   createNewGroup()
   {
-    console.log("TODO: Going to create: ");
-    console.log(new Chatroom(null,this.user,null,this.newChatroomName));
-  }
-
-  getContactMessages(contact: User)
-  {
-    if (this.session != null)
+    if(this.newChatroomName!="")
     {
-      this.session.chats.forEach(c => 
-      {
-        if(c.contact.username == contact.username){
-          return c.messages;
-        }
-      })
+      this.userService.create_group(this.user,new Chatroom(null,this.user,null,this.newChatroomName,null)).subscribe(r => 
+        {
+          console.log("CREATE NEW GROUP RESPONSE");
+          console.log(r);
+          this.session.groups = [];
+          this.loadGroups();
+          this.newChatroomName = ""
+          this.addingChatroom = false;
+          this.notificationService.showSuccess("¡Grupo creado exitosamente!","");
+
+        });
     }
-    
+    console.log("TODO: Going to create: ");
+    console.log(new Chatroom(null,this.user,null,this.newChatroomName,null));
   }
 
-  changeChat(chat: Chat)
+  addContactToGroup(contact: User)
   {
-    // console.log(chat);
-    this.receiver = chat.contact;
-    this.chat = chat;
-    this.newMessage = "";
+    if(this.chat.chatroom!=null){
+      this.userService.add_user_to_group(contact,this.chat.chatroom).subscribe(r =>{})
+    }
   }
 
-  disconnect()
-  {
-    this.chatService._disconnect();
-    this.session = new Session("",[]);
-    this.connected = false;
-    this.disconnected = true;
-  }
 
-  sendMessage()
-  {
-    var date = new Date();
-    // console.log(date.getTime());
-    var newDirect = new Message(null,this.user,date.getTime(),this.newMessage,true,this.receiver,null,null);
-    // console.log("newDirect");
-    // console.log(newDirect);
-    this.chatService._send(newDirect);
-    this.chat.messages.push(newDirect);
-    this.newMessage = "";
-  }
 
+
+
+
+
+
+  
   handleMessage(message: Message)
   {
     console.log(message);
-    // this.notificationService.showSuccess("hola", "prueba");
     
     if(message.receiver!= null)
     {
@@ -186,7 +288,19 @@ export class ChatComponent implements OnInit {
         }
         
       })
+    } else if(message.chatroom!= null)
+    {
+      this.session.groups.forEach(g => 
+      {
+        if(g.chatroom.name == message.chatroom.name)
+        {
+          g.messages.push(message);
+        }
+        
+      })
+
     }
+    
   }
   
 }

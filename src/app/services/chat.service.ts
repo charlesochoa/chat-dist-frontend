@@ -68,10 +68,22 @@ export class ChatService {
   * Send message to sever via web socket
   * @param {*} message 
   */
- _send(message) {
-  console.log("JSON.stringify(message)");
+//  _send(message) {
+//   console.log("SEND DIRECT JSON.stringify(message)");
+//   console.log(JSON.stringify(message));
+//   this.stompClient.send(this.config.WS_DIR_MESSAGE_CTRL + 
+//     "send-direct-message", this.config.httpOptions, JSON.stringify(message));
+//   }
+
+  /**
+  * Send message to sever via web socket
+  * @param {*} message 
+  */
+ _send_group(message) {
+  console.log("SEND GROUP JSON.stringify(message)");
   console.log(JSON.stringify(message));
-  this.stompClient.send("/app/chat-send", this.config.httpOptions, JSON.stringify(message));
+  this.stompClient.send(this.config.GROUP_MESSAGE_CTRL + 
+    "send-group-message", this.config.httpOptions, JSON.stringify(message));
 }
 
 /**

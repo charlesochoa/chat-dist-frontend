@@ -10,16 +10,23 @@ export class ConfigService {
   
   // Develop
   // WS_SERVER = 'http://192.168.1.149:8080/ws/';
-  // SERVER = 'http://192.168.1.149:8080/';
+  SERVER = 'http://192.168.1.149:8080/';
   WS_SERVER = 'http://localhost:8080/ws/';
-  SERVER = 'http://localhost:8080/';
+
+  WS_APP = "app/";
+  
+  // SERVER = 'http://localhost:8080/';
   // Production
   //private API_SERVER = "https://chat-dist-backend.herokuapp.com/ws";
 
   AUX_CTRL = this.SERVER + "";
   AUTH_CTRL = this.SERVER + "auth/";
-  DIR_MESSAGE_CTRL = this.SERVER + "direct-message/";
-  CHATROOM_CTRL = this.SERVER + "chatroom/";
+  DIR_MESSAGE_CTRL = this.SERVER + "direct-messages/";
+  GROUP_MESSAGE_CTRL = this.SERVER + "group-messages/";
+  // WS_DIR_MESSAGE_CTRL = this.SERVER +this.WS_APP+ "direct-messages/";
+  // WS_GROUP_MESSAGE_CTRL = this.SERVER +this.WS_APP+ "group-messages/";
+  CHATROOM_CTRL = this.SERVER + "chatrooms/";
+  USER_CTRL = this.SERVER + "users/";
 
   sign_up = this.AUTH_CTRL + "sign-up"
   sign_in = this.AUTH_CTRL + "sign-in"

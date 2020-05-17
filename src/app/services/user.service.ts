@@ -5,6 +5,8 @@ import { ConfigService } from '../config/config.service';
 import { catchError, retry } from 'rxjs/operators';
 import { throwError, Observable } from 'rxjs';
 import { Credentials } from '../models/credentials';
+import { Chatroom } from '../models/chatroom';
+import { Message } from '../models/message';
 
 @Injectable({
   providedIn: 'root'
@@ -32,8 +34,13 @@ export class UserService {
     this.config.set_authorization(token);
   }
 
+  get_all_users(){
+    console.log(this.config.USER_CTRL + "all/");
+    return this.httpClient.get(this.config.USER_CTRL + "all/",this.config.httpOptions);
+  }
+
   get_all_direct_messages(user: User){
-    console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(user));
+    console.log(this.config.DIR_MESSAGE_CTRL + "all/" + JSON.stringify(user));
     return this.httpClient.get(this.config.DIR_MESSAGE_CTRL + "all/" + user.id,this.config.httpOptions);
   }
 
@@ -43,6 +50,38 @@ export class UserService {
     return this.httpClient.get(this.config.CHATROOM_CTRL + "all/" + user.id,this.config.httpOptions);
   }
 
+
+  get_all_group_messages(chatroom: Chatroom){
+    console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(chatroom));
+    return this.httpClient.get(this.config.GROUP_MESSAGE_CTRL + "all/" + chatroom.id,this.config.httpOptions);
+  }
+
+  create_group(admin:User, newGroup: Chatroom)
+  {
+    console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(newGroup));
+    return this.httpClient.post(this.config.CHATROOM_CTRL + "add/",JSON.stringify(newGroup),this.config.httpOptions);
+  }
+
+  send_direct_message(message: Message)
+  {
+    console.log("send_direct_message(message: Message)");
+    return this.httpClient.post(this.config.DIR_MESSAGE_CTRL + "send-direct-message",JSON.stringify(message),this.config.httpOptions)
+  }
+  send_group_message(message: Message)
+  {
+    console.log("send-group-message(message: Message)");
+    return this.httpClient.post(this.config.GROUP_MESSAGE_CTRL + "send-group-message/" + message.chatroom.id,JSON.stringify(message),this.config.httpOptions)
+  }
+
+  add_user_to_group(contact:User, group: Chatroom)
+  {
+    return this.httpClient.post(this.config.CHATROOM_CTRL + group.id + "/add/" + contact.id,{},this.config.httpOptions);
+  }
+
+  all_users_from_group(group: Chatroom)
+  {
+    return this.httpClient.get(this.config.CHATROOM_CTRL + group.id + "/users/",this.config.httpOptions);
+  }
 
   set_token(token: string){
     this.token = token;

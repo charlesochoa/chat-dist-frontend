@@ -7,8 +7,15 @@
 
 
 div.ex1 {
-    background-color: whitesmoke;
-    height: 300px;
+  background-color: whitesmoke;
+  height: 250px;
+  overflow-y: scroll;
+  overflow-anchor: auto;
+}
+
+div.ex2 {
+    height: 350px;
+    overflow: hidden;
     overflow-y: scroll;
     overflow-anchor: auto;
   }
