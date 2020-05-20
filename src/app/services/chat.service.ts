@@ -28,13 +28,13 @@ export class ChatService {
     console.log("Initialize WebSocket Connection");
     let ws = new SockJS(this.config.WS_SERVER);
     this.stompClient = Stomp.over(ws);
+    console.log(this.stompClient);
     const _this = this;
-    _this.stompClient.connect({"Authorization": this.token}, function (frame) {
-        _this.stompClient.subscribe(_this.config.topic + user.username, function (sdkEvent) {
-            _this.onMessageReceived(sdkEvent.body);
-        }); 
-        _this._listen(user);
-        
+    _this.stompClient.connect({}, function (frame) {
+      console.log(frame)
+      _this.stompClient.subscribe(_this.config.topic + user.username, function (sdkEvent) {
+          _this.onMessageReceived(sdkEvent.body);
+      });
     }, this.errorCallBack);
   };
 
@@ -75,23 +75,23 @@ export class ChatService {
 //     "send-direct-message", this.config.httpOptions, JSON.stringify(message));
 //   }
 
+
   /**
   * Send message to sever via web socket
   * @param {*} message 
   */
- _send_group(message) {
-  console.log("SEND GROUP JSON.stringify(message)");
-  console.log(JSON.stringify(message));
-  this.stompClient.send(this.config.GROUP_MESSAGE_CTRL + 
-    "send-group-message", this.config.httpOptions, JSON.stringify(message));
+ _listen(user) {
+  console.log("Try to start listening websockets")
+  this.stompClient.send("app/receive-message", {}, JSON.stringify(user));
 }
 
-/**
-* Send message to sever via web socket
-* @param {*} message 
-*/
-_listen(user) {
-    this.stompClient.send("/app/chat-receive", {}, JSON.stringify(user));
+  /**
+  * Send message to sever via web socket
+  * @param {*} message 
+  */
+ test(message) {
+  console.log("Try to start listening websockets")
+  this.stompClient.send("app/chat.sendMessage", {}, JSON.stringify(message));
 }
 
   onMessageReceived(body: string) {

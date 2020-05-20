@@ -14,7 +14,7 @@ div.ex1 {
 }
 
 div.ex2 {
-    height: 350px;
+    height: 420px;
     overflow: hidden;
     overflow-y: scroll;
     overflow-anchor: auto;

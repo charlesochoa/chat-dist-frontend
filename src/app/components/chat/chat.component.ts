@@ -1,16 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ChatService } from '../../services/chat.service';
 import { Message }    from '../../models/message';
 import { User } from '../../models/user';
 import { UserService } from '../../services/user.service';
 import { Credentials } from '../../models/credentials';
 import { Timestamp } from 'rxjs/internal/operators/timestamp';
-import { HttpResponse } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { HttpResponse, HttpEventType, HttpErrorResponse } from '@angular/common/http';
+import { map, catchError } from 'rxjs/operators';
 import { Session } from '../../models/session';
 import { Chat } from 'src/app/models/chat';
 import { NotificationService } from 'src/app/services/notification.service';
 import { Chatroom } from 'src/app/models/chatroom';
+import { UploadService } from 'src/app/services/upload.service';
+import { of } from 'rxjs';
+import { FormGroup, FormBuilder } from '@angular/forms';
+import { UploadResponse } from 'src/app/models/upload-response';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 
 @Component({
@@ -18,13 +23,15 @@ import { Chatroom } from 'src/app/models/chatroom';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent implements OnInit {
 
+export class ChatComponent implements OnInit {
+  
   session: Session;
   chatService: ChatService;
   chat: Chat;
   credentials: Credentials;
-  newMessage : string;
+  newMessage : Message;
+  newMessageContent: string;
   result: User;
   user: User;
   newChatroomName: string;
@@ -37,9 +44,22 @@ export class ChatComponent implements OnInit {
   connected: boolean;
   addingChatroom: boolean;
   username: string;
+  selectedFiles: File[];
+  form: FormGroup;
+  error: string;
+  sendingFile: boolean;
+  fileName: string;
+  fileUrl: SafeResourceUrl;
+  uploadResponse = new UploadResponse("","","",null);
 
-  constructor(private userService: UserService, private notificationService: NotificationService)
+  constructor(private formBuilder: FormBuilder,
+              private userService: UserService, 
+              private notificationService: NotificationService,
+              private uploadService: UploadService,
+              private sanitizer: DomSanitizer)
   {
+    this.fileName = ""
+    this.selectedFiles = [];
     this.session = new Session("",[],[]);
     this.chatTitle= "";
     this.chatMessages= [];
@@ -51,18 +71,61 @@ export class ChatComponent implements OnInit {
     this.username= "inseguro1";
     this.password = "12345";
     this.token = "";
+    this.sendingFile = false;
     this.newChatroomName = "";
+    this.newMessage = new Message(null,this.user,null,null,null,null,null,null);
+    this.newMessageContent = "";
   }
   ngOnInit() {
     this.chatService = new ChatService(this);
+    this.form = this.formBuilder.group({
+      file: ['']
+    });
+  }
+
+  onFileChange(event) {
+    if (event.target.files.length > 0) {
+      const file = event.target.files[0];
+      this.form.get('file').setValue(file);
+    }
+  }
+  
+  onSubmit() {
+    const formData = new FormData();
+    // console.log("this.onSubmit");
+    // console.log(this.form.get('file').value!="");
+    formData.append('file', this.form.get('file').value);
+    this.sendingFile = true;
+    // console.log("onSubmit: this.sendingFile");
+    // console.log(this.sendingFile);
+    this.uploadService.upload(formData).subscribe(
+      (res: UploadResponse) => 
+      {
+        // console.log(res);
+        this.uploadResponse = res;
+        this.newMessageContent = this.uploadResponse.fileDownloadUri;
+        this.sendMessage();
+      },
+      (err) => 
+      {
+        this.sendingFile = false;
+        this.notificationService.showError( JSON.stringify(err),"Error");
+        // console.log(err)
+      }
+    );
   }
 
   sign_up()
   {
     this.userService.sign_up(new User(null,this.username,null,this.password,null)).subscribe((data: User) => 
     {
-      this.result = data;
-      console.log(this.result);
+      this.user = data;
+      // console.log(this.result);
+      this.loadDirectChats();
+      this.loadGroups();
+      this.chatService._connect(this.user);
+      this.connected = true;
+      this.disconnected = false;
 
     })
   }
@@ -71,9 +134,10 @@ export class ChatComponent implements OnInit {
     if(this.password!= "" && this.username!=""){
       this.credentials = new Credentials(this.username,this.password);
       this.userService.login(this.credentials)
+
       .subscribe((response: User) => 
       {
-        console.log(response);
+        // console.log(response);
         if(response!=null) 
         {
           // this.token = response["Authorization"];
@@ -116,8 +180,8 @@ export class ChatComponent implements OnInit {
   {
     this.userService.get_all_users().subscribe((cs: User[]) => 
     {
-      console.log("LoadContacts Response:");
-      console.log(cs);
+      // console.log("LoadContacts Response:");
+      // console.log(cs);
       cs.forEach((c: User) =>
       {
         if(c.username != this.credentials.username)
@@ -125,15 +189,19 @@ export class ChatComponent implements OnInit {
           this.session.chats.push(new Chat(c,null,false,[]));
         }
       })
-      this.loadDirectMessages();
+      //this.loadDirectMessages();
+      
     })
+  }
+  listen(){
+    // this.chatService._listen(this.user);
   }
   loadDirectMessages()
   {
     this.userService.get_all_direct_messages(this.user).subscribe((allDirMessages: Message[]) => 
     {
-      // console.log("allDirMessages");
-      // console.log(allDirMessages);
+      // // console.log("allDirMessages");
+      // // console.log(allDirMessages);
       allDirMessages.forEach(m => 
       {
         this.session.chats.forEach(c => 
@@ -150,14 +218,14 @@ export class ChatComponent implements OnInit {
   {
     this.userService.get_all_chatrooms(this.user).subscribe((chatrooms: any) => 
     {
-      console.log("chatrooms:");
-      console.log(chatrooms);
+      // console.log("chatrooms:");
+      // console.log(chatrooms);
       chatrooms.forEach((chatroom: Chatroom) => 
       {
           this.session.groups.push(new Chat(null,chatroom,true,[]));
       })
-      console.log("this.session.groups");
-      console.log(this.session.groups);
+      // console.log("this.session.groups");
+      // console.log(this.session.groups);
       
       this.loadGroupMessages();
 
@@ -178,7 +246,7 @@ export class ChatComponent implements OnInit {
 
   changeChat(chat: Chat)
   {
-    console.log(chat);
+    // console.log(chat);
     if(chat.isGroup)
     {
       this.chatTitle = "Group: " + chat.chatroom.name;
@@ -187,48 +255,46 @@ export class ChatComponent implements OnInit {
       this.chatTitle = "To: " + chat.contact.username;
 
     }
-    console.log(this.chatTitle);
+    // console.log(this.chatTitle);
     this.chat = chat
     this.chatMessages = chat.messages;
-    this.newMessage = "";
+    this.newMessageContent = "";
   }
 
   sendMessage()
   {
-    console.log("Trying to send a message");
-    if(this.newMessage!=""){
-
-      var date = new Date();
-      if(this.chat.isGroup)
-      {
-        var newGroup = new Message(null,this.user,date.getTime(),this.newMessage,true,null,this.chat.chatroom,null);
-        console.log("Trying to send message to group:");
-        console.log(newGroup);
-        this.userService.send_group_message(newGroup).subscribe(r => {
-          console.log(r);
-        })
-        this.chat.messages.push(newGroup);
-        this.newMessage = "";
-      } else 
-      {
-        var newDirect = new Message(null,this.user,date.getTime(),this.newMessage,true,this.chat.contact,null,null);
-        this.userService.send_direct_message(newDirect).subscribe(r => {
-          console.log(r);
-        })
-        this.chat.messages.push(newDirect);
-        this.newMessage = "";
-      }
-      // this.changeChat(this.chat);
-      // console.log(date.getTime());
-      
-      // console.log("newDirect");
-      // console.log(newDirect);
+    // console.log("Trying to send a message");
+    // console.log("sendMessage: this.sendingFile");
+    // console.log(this.sendingFile);
+    var date = new Date();
+    if(this.newMessageContent!= "" || this.sendingFile)
+    {
+      var newM = new Message(null,this.user,date.getTime(),this.newMessageContent,this.sendingFile!=true,this.chat.contact,this.chat.chatroom,null);
+      // console.log("Trying to send message:");
+      // console.log(newM);
+      this.userService.send_message(newM).subscribe(r => {
+        // console.log(r);
+      })
+      this.chat.messages.push(newM);
+      this.newMessageContent = "";
+      this.sendingFile = false;
     }
-    
+    else 
+    {
+      this.notificationService.showError("No ha colocado nada para enviar","Error enviando");
+    }
   }
-
-
-
+  notInvited(c: User) {
+    if(this.chat!=null)
+    {
+      if(this.chat.isGroup && this.chat.chatroom.admin.username == this.user.username)
+      {
+        return this.chat.chatroom.users.find(x => x.username == c.username)==undefined;
+      }
+    }
+    return false;
+  }
+  
   addNewChat()
   {
     this.addingChatroom = true;
@@ -245,8 +311,8 @@ export class ChatComponent implements OnInit {
     {
       this.userService.create_group(this.user,new Chatroom(null,this.user,null,this.newChatroomName,null)).subscribe(r => 
         {
-          console.log("CREATE NEW GROUP RESPONSE");
-          console.log(r);
+          // console.log("CREATE NEW GROUP RESPONSE");
+          // console.log(r);
           this.session.groups = [];
           this.loadGroups();
           this.newChatroomName = ""
@@ -255,28 +321,28 @@ export class ChatComponent implements OnInit {
 
         });
     }
-    console.log("TODO: Going to create: ");
-    console.log(new Chatroom(null,this.user,null,this.newChatroomName,null));
+    // console.log("TODO: Going to create: ");
+    // console.log(new Chatroom(null,this.user,null,this.newChatroomName,null));
   }
 
   addContactToGroup(contact: User)
   {
     if(this.chat.chatroom!=null){
-      this.userService.add_user_to_group(contact,this.chat.chatroom).subscribe(r =>{})
+      this.userService.add_user_to_group(contact,this.chat.chatroom).subscribe(r =>{
+        // console.log(r);
+        this.loadGroups();
+      })
     }
   }
 
-
-
-
-
-
-
-
+  downloadFile(message: Message)
+  {
+    // console.log(message);
+  }
   
   handleMessage(message: Message)
   {
-    console.log(message);
+    // console.log(message);
     
     if(message.receiver!= null)
     {
@@ -285,6 +351,7 @@ export class ChatComponent implements OnInit {
         if(c.contact.username == message.sender.username)
         {
           c.messages.push(message);
+          this.notificationService.showSuccess(message.content,message.sender.username);
         }
         
       })
@@ -295,6 +362,7 @@ export class ChatComponent implements OnInit {
         if(g.chatroom.name == message.chatroom.name)
         {
           g.messages.push(message);
+          this.notificationService.showSuccess(message.content,message.chatroom.name);
         }
         
       })

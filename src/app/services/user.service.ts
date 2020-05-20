@@ -20,13 +20,13 @@ export class UserService {
   constructor(private httpClient: HttpClient) { }
 
   sign_up(newUser: User){
-    console.log("sign up services: " + this.config.sign_up + " User: " + JSON.stringify(newUser))
+    // console.log("sign up services: " + this.config.sign_up + " User: " + JSON.stringify(newUser))
     return this.httpClient.post(this.config.sign_up, JSON.stringify(newUser),this.config.httpOptions);
   }
 
 
   login(newUser: Credentials){
-    console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(newUser));
+    // console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(newUser));
     return this.httpClient.post<any>(this.config.sign_in, JSON.stringify(newUser),this.config.httpOptions);
   }
   
@@ -35,47 +35,52 @@ export class UserService {
   }
 
   get_all_users(){
-    console.log(this.config.USER_CTRL + "all/");
+    // console.log(this.config.USER_CTRL + "all/");
     return this.httpClient.get(this.config.USER_CTRL + "all/",this.config.httpOptions);
   }
 
   get_all_direct_messages(user: User){
-    console.log(this.config.DIR_MESSAGE_CTRL + "all/" + JSON.stringify(user));
+    // console.log(this.config.DIR_MESSAGE_CTRL + "all/" + JSON.stringify(user));
     return this.httpClient.get(this.config.DIR_MESSAGE_CTRL + "all/" + user.id,this.config.httpOptions);
   }
 
 
   get_all_chatrooms(user: User){
-    console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(user));
+    // console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(user));
     return this.httpClient.get(this.config.CHATROOM_CTRL + "all/" + user.id,this.config.httpOptions);
   }
 
 
   get_all_group_messages(chatroom: Chatroom){
-    console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(chatroom));
+    // console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(chatroom));
     return this.httpClient.get(this.config.GROUP_MESSAGE_CTRL + "all/" + chatroom.id,this.config.httpOptions);
   }
 
   create_group(admin:User, newGroup: Chatroom)
   {
-    console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(newGroup));
+    // console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(newGroup));
     return this.httpClient.post(this.config.CHATROOM_CTRL + "add/",JSON.stringify(newGroup),this.config.httpOptions);
   }
 
-  send_direct_message(message: Message)
+  send_message(message: Message)
   {
-    console.log("send_direct_message(message: Message)");
-    return this.httpClient.post(this.config.DIR_MESSAGE_CTRL + "send-direct-message",JSON.stringify(message),this.config.httpOptions)
+    if(message.chatroom!=null){
+      return this.httpClient.post(this.config.GROUP_MESSAGE_CTRL + "send/" + message.chatroom.id,JSON.stringify(message),this.config.httpOptions)
+ 
+    } else {
+      return this.httpClient.post(this.config.DIR_MESSAGE_CTRL + "send",JSON.stringify(message),this.config.httpOptions)
+
+    }
   }
   send_group_message(message: Message)
   {
-    console.log("send-group-message(message: Message)");
-    return this.httpClient.post(this.config.GROUP_MESSAGE_CTRL + "send-group-message/" + message.chatroom.id,JSON.stringify(message),this.config.httpOptions)
+    // console.log("send-group-message(message: Message)");
+    return this.httpClient.post(this.config.GROUP_MESSAGE_CTRL + "send/" + message.chatroom.id,JSON.stringify(message),this.config.httpOptions)
   }
 
   add_user_to_group(contact:User, group: Chatroom)
   {
-    return this.httpClient.post(this.config.CHATROOM_CTRL + group.id + "/add/" + contact.id,{},this.config.httpOptions);
+    return this.httpClient.post(this.config.CHATROOM_CTRL + group.id + "/add-user/" + contact.id,{},this.config.httpOptions);
   }
 
   all_users_from_group(group: Chatroom)
@@ -118,7 +123,7 @@ export class UserService {
     } : {});
 
     this.httpClient.get(this.config.sign_in, {headers: headers}).subscribe(response => {
-        console.log(response)
+        // console.log(response)
     });
 
   }
