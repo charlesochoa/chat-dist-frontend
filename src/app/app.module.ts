@@ -15,6 +15,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ChatroomComponent } from './components/chatroom/chatroom.component';
 import { ToastrModule } from 'ngx-toastr';
+import { AdminComponent } from './components/admin/admin.component';
+import { LoginComponent } from './components/login/login.component';
 
 
 
@@ -25,7 +27,9 @@ import { ToastrModule } from 'ngx-toastr';
   declarations: [
     AppComponent,
     ChatComponent,
-    ChatroomComponent
+    ChatroomComponent,
+    AdminComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,

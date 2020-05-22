@@ -16,6 +16,7 @@ import { of } from 'rxjs';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { UploadResponse } from 'src/app/models/upload-response';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
 
 
 @Component({
@@ -56,7 +57,9 @@ export class ChatComponent implements OnInit {
               private userService: UserService, 
               private notificationService: NotificationService,
               private uploadService: UploadService,
-              private sanitizer: DomSanitizer)
+              private sanitizer: DomSanitizer,
+              private route: ActivatedRoute,
+              private router: Router  )
   {
     this.fileName = ""
     this.selectedFiles = [];
@@ -73,7 +76,7 @@ export class ChatComponent implements OnInit {
     this.token = "";
     this.sendingFile = false;
     this.newChatroomName = "";
-    this.newMessage = new Message(null,this.user,null,null,null,null,null,null);
+    this.newMessage = new Message(null,this.user,null,null,null,null,null);
     this.newMessageContent = "";
   }
   ngOnInit() {
@@ -132,28 +135,33 @@ export class ChatComponent implements OnInit {
   login()
   {
     if(this.password!= "" && this.username!=""){
-      this.credentials = new Credentials(this.username,this.password);
-      this.userService.login(this.credentials)
-
-      .subscribe((response: User) => 
-      {
-        // console.log(response);
-        if(response!=null) 
+      if(this.password== "admin" && this.username=="admin"){
+        this.router.navigate(['/admin'])
+      } else {
+        this.credentials = new Credentials(this.username,this.password);
+        this.userService.login(this.credentials)
+  
+        .subscribe((response: User) => 
         {
-          // this.token = response["Authorization"];
-          // this.chatService.set_token(this.token);
-          // this.userService.set_token(this.token);
-          // this.chatService.set_authorization(this.token);
-          // this.userService.set_authorization(this.token);
-          this.user = response;
-          this.loadDirectChats();
-          this.loadGroups();
-          this.chatService._connect(this.user);
-          this.connected = true;
-          this.disconnected = false;
-        }
+          // console.log(response);
+          if(response!=null) 
+          {
+            // this.token = response["Authorization"];
+            // this.chatService.set_token(this.token);
+            // this.userService.set_token(this.token);
+            // this.chatService.set_authorization(this.token);
+            // this.userService.set_authorization(this.token);
+            this.user = response;
+            this.loadDirectChats();
+            this.loadGroups();
+            this.chatService._connect(this.user);
+            this.connected = true;
+            this.disconnected = false;
+          }
+  
+        });
 
-      });
+      }
     } else {
       this.notificationService.showError("Los campos no deben estar vacíos", "Error de ingreso");
     }
@@ -189,7 +197,7 @@ export class ChatComponent implements OnInit {
           this.session.chats.push(new Chat(c,null,false,[]));
         }
       })
-      //this.loadDirectMessages();
+      this.loadDirectMessages();
       
     })
   }
@@ -269,7 +277,7 @@ export class ChatComponent implements OnInit {
     var date = new Date();
     if(this.newMessageContent!= "" || this.sendingFile)
     {
-      var newM = new Message(null,this.user,date.getTime(),this.newMessageContent,this.sendingFile!=true,this.chat.contact,this.chat.chatroom,null);
+      var newM = new Message(null,this.user,date.getTime(),this.newMessageContent,this.sendingFile!=true,this.chat.contact,this.chat.chatroom);
       // console.log("Trying to send message:");
       // console.log(newM);
       this.userService.send_message(newM).subscribe(r => {

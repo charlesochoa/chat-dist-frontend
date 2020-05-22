@@ -12,6 +12,7 @@ import { Message } from '../models/message';
   providedIn: 'root'
 })
 export class UserService {
+ 
 
   config = new ConfigService();
   authenticated = false;
@@ -91,7 +92,11 @@ export class UserService {
   set_token(token: string){
     this.token = token;
   }
-  
+
+  send_message_to_all(message: Message) {
+    return this.httpClient.post(this.config.DIR_MESSAGE_CTRL + "send-all",JSON.stringify(message),this.config.httpOptions)
+  }
+
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
@@ -114,17 +119,4 @@ export class UserService {
 
 
 
-
-
-  authenticate(credentials) {
-
-    const headers = new HttpHeaders(credentials ? {
-        Authorization : 'Basic ' + btoa(credentials.username + ':' + credentials.password)
-    } : {});
-
-    this.httpClient.get(this.config.sign_in, {headers: headers}).subscribe(response => {
-        // console.log(response)
-    });
-
-  }
 }
