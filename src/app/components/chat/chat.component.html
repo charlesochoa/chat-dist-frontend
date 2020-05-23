@@ -1,78 +1,62 @@
 <div style="padding: 13px;">
   <div class="container">
-    <h1 *ngIf="disconnected" >Login</h1>
-    <h1 *ngIf="connected" >Chats</h1>
-      
-      <form #chatForm="ngForm">
-        <div class="form-group ">
-          <div class="row">
-            <div *ngIf="disconnected" class="col-sm-3" >
-              <div class="row">
-                <input type="text" placeholder="Username" class="form-control" id="name" required [(ngModel)]="username" name="username">
-              </div>
-              <div class="row top5">
-                <input type="password" placeholder="Password" class="form-control" id="password" required [(ngModel)]="password" name="password">
-              </div>
-            </div>
-            <div *ngIf="connected" class="col-sm-3" >
-              <div class="row">
-                <label for="to">Bienvenido {{username}}</label> 
-              </div>
-            </div>
-            <div class="col-sm-4">
-              <button type="button" *ngIf="connected" class="btn btn-danger col-sm-12" (click)="logout()">Salir</button>
-              <button type="button" *ngIf="disconnected" class="btn btn-warning col-sm-12" (click)="login()">Ingresa</button>
-              <label class="col-sm-12"></label>
-              <button type="button" *ngIf="disconnected" class="btn btn-info col-sm-12" (click)="sign_up()">Regístrate</button>
-            </div>
-          </div>
-        </div>
-      </form>
-      <div class="row">
-        <div *ngIf="connected" class="col-sm-4 ex2" >
-            <label class="col-sm-12">Contacts</label>
-            <div *ngFor="let chat of session.chats" >
-              <button class="btn col-sm-10" (click)="changeChat(chat)">{{chat.contact.username}}</button>
-              <button *ngIf="notInvited(chat.contact)" (click)="addContactToGroup(chat.contact)" class="btn btn-success col-sm-2" >+</button>
-            </div>
-            <label class="col-sm-12">Groups</label>
-            <button *ngFor="let group of session.groups" class=" btn col-sm-12" (click)="changeChat(group)">{{group.chatroom.name}}</button>
-            <label class="col-sm-12"></label>
-            <form #chatroomForm="ngForm">
-              <input *ngIf="addingChatroom" type="text" placeholder="Nuevo grupo" class="form-control" id="newChatroomName" required [(ngModel)]="newChatroomName" name="newChatroomName">
-              <button *ngIf="addingChatroom ==false" class="btn btn-success col-sm-4" (click)="addNewChat()">+</button>
-              <button type="submit" *ngIf="addingChatroom" class="btn btn-success col-sm-4" (click)="createNewGroup()">Add</button>
-            </form>
-            
-        </div>
-        <div *ngIf="connected" class="col-sm-8" >
-
-          <form  *ngIf="chatTitle!=''" #chatForm="ngForm">
-            <div class="form-group">
-              <label for="to">{{chatTitle}}</label>
-            </div>
-            <div class="form-group ex1">
-              <div *ngFor="let message of chatMessages">
-                <p *ngIf="message.text==true"><span style="font-weight: bold;">[{{message.time| date :  "dd-MM-y hh:mm" }}] {{message.sender.username}}: </span>{{message.content}} </p>
-                <p *ngIf="message.text==false"><span style="font-weight: bold;">[{{message.time| date :  "dd-MM-y hh:mm" }}] {{message.sender.username}}: </span><a *ngIf="message.text!=true" class="btn btn-warning" href="{{message.content}}" > Descargar ↓ </a></p>
-              </div>
-            </div>
-            <div   class="form-group">
-              <input type="text" placeholder="Write a message" class="form-control" id="name" required [(ngModel)]="newMessageContent" name="newMessageContent">
-            </div>
-            
-            <button type="submit" class="btn btn-success" (click)="sendMessage()" class="col-sm-6 offset-sm-6">Send!</button>
-            
-          </form>
-          <div class="row">
-            <form [formGroup]="form" (ngSubmit)="onSubmit()"  class="col-sm-12" *ngIf="chatTitle!=''" #chatForm="ngForm">
-              
-              <button type="submit" class="col-sm-6" >Upload</button>
-              <input type="file"  id="fileUpload" name="fileUpload" class="col-sm-6" name="file" (change)="onFileChange($event)" />
-            </form>
-          </div>
-          
+    <h1 >Chats</h1>
+    <div class="row">
+      <div class="col-sm-3" >
+        <div class="row">
+          <label for="to">Bienvenido {{username}}</label> 
         </div>
       </div>
+      <div class="col-sm-3">
+        <button type="button" class="btn btn-danger col-sm-12" (click)="logout()">Salir</button>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div  class="col-sm-4 ex2" >
+          <label class="col-sm-12">Contacts</label>
+          <div *ngFor="let chat of session.chats" >
+            <button class="btn col-sm-10" (click)="changeChat(chat)">{{chat.contact.username}}</button>
+            <button *ngIf="notInvited(chat.contact)" (click)="addContactToGroup(chat.contact)" class="btn btn-success col-sm-2" >+</button>
+          </div>
+          <label class="col-sm-12">Groups</label>
+          <button *ngFor="let group of session.groups" class=" btn col-sm-12" (click)="changeChat(group)">{{group.chatroom.name}}</button>
+          <label class="col-sm-12"></label>
+          <form #chatroomForm="ngForm">
+            <input *ngIf="addingChatroom" type="text" placeholder="Nuevo grupo" class="form-control" id="newChatroomName" required [(ngModel)]="newChatroomName" name="newChatroomName">
+            <button *ngIf="addingChatroom ==false" class="btn btn-success col-sm-4" (click)="addNewChat()">+</button>
+            <button type="submit" *ngIf="addingChatroom" class="btn btn-success col-sm-4" (click)="createNewGroup()">Add</button>
+          </form>
+          
+      </div>
+      <div class="col-sm-8" >
+
+        <form  *ngIf="chatTitle!=''" #chatForm="ngForm">
+          <div class="form-group">
+            <label for="to">{{chatTitle}}</label>
+          </div>
+          <div class="form-group ex1">
+            <div *ngFor="let message of chatMessages">
+              <p *ngIf="message.text==true"><span style="font-weight: bold;">[{{message.time| date :  "dd-MM-y hh:mm" }}] {{message.sender.username}}: </span>{{message.content}} </p>
+              <p *ngIf="message.text==false"><span style="font-weight: bold;">[{{message.time| date :  "dd-MM-y hh:mm" }}] {{message.sender.username}}: </span><a *ngIf="message.text!=true" class="btn btn-warning" href="{{message.content}}" > Descargar ↓ </a></p>
+            </div>
+          </div>
+          <div   class="form-group">
+            <input type="text" placeholder="Write a message" class="form-control" id="name" required [(ngModel)]="newMessageContent" name="newMessageContent">
+          </div>
+          
+          <button type="submit" class="btn btn-success" (click)="sendMessage()" class="col-sm-6 offset-sm-6">Send!</button>
+          
+        </form>
+        <div class="row">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()"  class="col-sm-12" *ngIf="chatTitle!=''" #chatForm="ngForm">
+            
+            <button type="submit" class="col-sm-6" >Upload</button>
+            <input type="file"  id="fileUpload" name="fileUpload" class="col-sm-6" name="file" (change)="onFileChange($event)" />
+          </form>
+        </div>
+        
+      </div>
+    </div>
   </div>
 </div>  

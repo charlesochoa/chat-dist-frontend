@@ -9,11 +9,11 @@
                 <div class="row">
                   <input type="text" placeholder="Username" class="form-control" id="name" required [(ngModel)]="username" name="username">
                 </div>
-                <div class="row top5">
+                <div class="row">
                   <input type="password" placeholder="Password" class="form-control" id="password" required [(ngModel)]="password" name="password">
                 </div>
               </div>
-              <div class="col-sm-4">
+              <div class="col-sm-3">
                 <button type="button" *ngIf="disconnected" class="btn btn-warning col-sm-12" (click)="login()">Ingresa</button>
                 <label class="col-sm-12"></label>
                 <button type="button" *ngIf="disconnected" class="btn btn-info col-sm-12" (click)="sign_up()">Regístrate</button>

@@ -1,6 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 import { Message } from 'src/app/models/message';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { NotificationService } from 'src/app/services/notification.service';
+import { UploadService } from 'src/app/services/upload.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ChatService } from 'src/app/services/chat.service';
+import { Session } from 'inspector';
+import { Chat } from 'src/app/models/chat';
+import { Credentials } from 'src/app/models/credentials';
+import { User } from 'src/app/models/user';
+import { UploadResponse } from 'src/app/models/upload-response';
+import { AdminService } from 'src/app/services/admin.service';
 
 @Component({
   selector: 'app-admin',
@@ -8,11 +20,64 @@ import { Message } from 'src/app/models/message';
   styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {
+  handleMessage(message: any) {
+    throw new Error("Method not implemented.");
+  }
 
   message: string;
-  constructor(private userService: UserService) { }
+  
+  session: Session;
+  adminService: AdminService;
+  chat: Chat;
+  credentials: Credentials;
+  newMessage : Message;
+  newMessageContent: string;
+  result: User;
+  user: User;
+  newChatroomName: string;
+  token: string;
+  password: string;
+  receiver: User;
+  chatTitle: string;
+  chatMessages: Message[];
+  disconnected: boolean;
+  connected: boolean;
+  addingChatroom: boolean;
+  username: string;
+  selectedFiles: File[];
+  form: FormGroup;
+  error: string;
+  sendingFile: boolean;
+  fileName: string;
+  fileUrl: SafeResourceUrl;
+  uploadResponse = new UploadResponse("","","",null);
+  constructor(private formBuilder: FormBuilder,
+              private userService: UserService, 
+              private notificationService: NotificationService,
+              private uploadService: UploadService,
+              private sanitizer: DomSanitizer,
+              private route: ActivatedRoute,
+              private router: Router  ) { }
 
   ngOnInit(): void {
+    this.adminService = new AdminService(this);
+    this.form = this.formBuilder.group({
+      file: ['']
+    });
+    this.token = this.route.snapshot.paramMap.get('token');
+    this.username = this.route.snapshot.paramMap.get('username');
+
+    if(this.username==undefined || this.token==undefined){
+      this.router.navigate(['/login']);
+    }
+    this.adminService.set_token(this.token);
+    this.userService.set_token(this.token);
+    this.adminService.set_authorization(this.token);
+    this.userService.set_authorization(this.token);
+    this.userService.get_profile(this.username).subscribe((u: any) => {
+                    this.user = u;
+                    this.adminService._connect_admin();
+                  })
   }
   
   sendMessage()
@@ -22,6 +87,13 @@ export class AdminComponent implements OnInit {
     .subscribe(r => {
       console.log(r);
     })
+  }
+  
+  logout()
+  {
+    this.adminService._disconnect();
+    
+    this.router.navigate(['/login']);
   }
 
 }

@@ -9,6 +9,7 @@ export class User {
     public email: string,
     public password: string,
     public bindingName: string,
-    
+    public roles: string[],
   ) {  }
+    
 }

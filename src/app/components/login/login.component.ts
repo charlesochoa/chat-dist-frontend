@@ -17,6 +17,7 @@ import { of } from 'rxjs';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { UploadResponse } from 'src/app/models/upload-response';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -56,6 +57,8 @@ export class LoginComponent implements OnInit {
               private userService: UserService, 
               private notificationService: NotificationService,
               private uploadService: UploadService,
+              private route: ActivatedRoute,
+              private router: Router,
               private sanitizer: DomSanitizer)
   {
     this.fileName = ""
@@ -63,13 +66,13 @@ export class LoginComponent implements OnInit {
     this.session = new Session("",[],[]);
     this.chatTitle= "";
     this.chatMessages= [];
-    this.chat = new Chat(new User(null,"","","",""),null,null,[]);
-    this.receiver = new User(0,"","","","");
+    this.chat = new Chat(new User(null,"","","","",[]),null,null,[]);
+    this.receiver = new User(0,"","","","",[]);
     this.disconnected= true;
+    this.username = "admin"
+    this.password = "admin"
     this.connected=false;
     this.addingChatroom = false;
-    this.username= "inseguro1";
-    this.password = "12345";
     this.token = "";
     this.sendingFile = false;
     this.newChatroomName = "";
@@ -77,21 +80,15 @@ export class LoginComponent implements OnInit {
     this.newMessageContent = "";
   }
   ngOnInit() {
-    this.form = this.formBuilder.group({
-      file: ['']
-    });
   }
 
 
   sign_up()
   {
-    this.userService.sign_up(new User(null,this.username,null,this.password,null)).subscribe((data: User) => 
+    this.userService.sign_up(new User(null,this.username,null,this.password,null,[])).subscribe((data: any) => 
     {
-      this.user = data;
-      // console.log(this.result);
-      this.chatService._connect(this.user);
-      this.connected = true;
-      this.disconnected = false;
+      console.log(data);
+      this.notificationService.showSuccess("Usuario creado exitosamente","¡Enhorabuena!");
 
     })
   }
@@ -103,40 +100,22 @@ export class LoginComponent implements OnInit {
 
       .subscribe((response: User) => 
       {
-        // console.log(response);
+        console.log(response);
         if(response!=null) 
         {
-          // this.token = response["Authorization"];
-          // this.chatService.set_token(this.token);
-          // this.userService.set_token(this.token);
-          // this.chatService.set_authorization(this.token);
-          // this.userService.set_authorization(this.token);
-          this.user = response;
-          this.chatService._connect(this.user);
-          this.connected = true;
-          this.disconnected = false;
+          this.notificationService.showSuccess("","¡Enhorabuena!")
+          this.token = response["Authorization"];
+          console.log(this.token);
+          if(this.username=="admin"){
+            this.router.navigate(['/admin',{ token: this.token , username: this.username}])
+          } else {
+            this.router.navigate(['/chat',{ token: this.token , username: this.username}])
+          }
         }
 
       });
     } else {
       this.notificationService.showError("Los campos no deben estar vacíos", "Error de ingreso");
     }
-  }
-  logout()
-  {
-    this.chatService._disconnect();
-    
-    this.session = new Session("",[],[]);
-    this.chatTitle= "";
-    this.chatMessages= [];
-    this.chat = new Chat(null,null,null,[]);
-    this.receiver = new User(0,"","","","");
-    this.disconnected= true;
-    this.connected=false;
-    this.addingChatroom = false;
-    this.token = "";
-    this.newChatroomName = "";
-    this.connected = false;
-    this.disconnected = true;
   }
 }

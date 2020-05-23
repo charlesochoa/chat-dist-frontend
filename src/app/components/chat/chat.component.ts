@@ -66,14 +66,12 @@ export class ChatComponent implements OnInit {
     this.session = new Session("",[],[]);
     this.chatTitle= "";
     this.chatMessages= [];
-    this.chat = new Chat(new User(null,"","","",""),null,null,[]);
-    this.receiver = new User(0,"","","","");
+    this.chat = new Chat(new User(null,"","","","",[]),null,null,[]);
+    this.receiver = new User(0,"","","","",[]);
     this.disconnected= true;
     this.connected=false;
     this.addingChatroom = false;
-    this.username= "inseguro1";
     this.password = "12345";
-    this.token = "";
     this.sendingFile = false;
     this.newChatroomName = "";
     this.newMessage = new Message(null,this.user,null,null,null,null,null);
@@ -84,6 +82,22 @@ export class ChatComponent implements OnInit {
     this.form = this.formBuilder.group({
       file: ['']
     });
+    this.token = this.route.snapshot.paramMap.get('token');
+    this.username = this.route.snapshot.paramMap.get('username');
+
+    if(this.username==undefined || this.token==undefined){
+      this.router.navigate(['/login']);
+    }
+    this.chatService.set_token(this.token);
+    this.userService.set_token(this.token);
+    this.chatService.set_authorization(this.token);
+    this.userService.set_authorization(this.token);
+    this.userService.get_profile(this.username).subscribe((u: any) => {
+                    this.user = u;
+                    this.chatService._connect(this.user);
+                    this.loadDirectChats();
+                    this.loadGroups();
+                  })
   }
 
   onFileChange(event) {
@@ -95,12 +109,8 @@ export class ChatComponent implements OnInit {
   
   onSubmit() {
     const formData = new FormData();
-    // console.log("this.onSubmit");
-    // console.log(this.form.get('file').value!="");
     formData.append('file', this.form.get('file').value);
     this.sendingFile = true;
-    // console.log("onSubmit: this.sendingFile");
-    // console.log(this.sendingFile);
     this.uploadService.upload(formData).subscribe(
       (res: UploadResponse) => 
       {
@@ -120,79 +130,30 @@ export class ChatComponent implements OnInit {
 
   sign_up()
   {
-    this.userService.sign_up(new User(null,this.username,null,this.password,null)).subscribe((data: User) => 
+    this.userService.sign_up(new User(null,this.username,null,this.password,null,[])).subscribe((data: User) => 
     {
       this.user = data;
-      // console.log(this.result);
-      this.loadDirectChats();
-      this.loadGroups();
-      this.chatService._connect(this.user);
-      this.connected = true;
-      this.disconnected = false;
+      this.notificationService.showSuccess("Usuario creado con éxito","");
 
     })
   }
-  login()
-  {
-    if(this.password!= "" && this.username!=""){
-      if(this.password== "admin" && this.username=="admin"){
-        this.router.navigate(['/admin'])
-      } else {
-        this.credentials = new Credentials(this.username,this.password);
-        this.userService.login(this.credentials)
-  
-        .subscribe((response: User) => 
-        {
-          // console.log(response);
-          if(response!=null) 
-          {
-            // this.token = response["Authorization"];
-            // this.chatService.set_token(this.token);
-            // this.userService.set_token(this.token);
-            // this.chatService.set_authorization(this.token);
-            // this.userService.set_authorization(this.token);
-            this.user = response;
-            this.loadDirectChats();
-            this.loadGroups();
-            this.chatService._connect(this.user);
-            this.connected = true;
-            this.disconnected = false;
-          }
-  
-        });
 
-      }
-    } else {
-      this.notificationService.showError("Los campos no deben estar vacíos", "Error de ingreso");
-    }
-  }
   logout()
   {
     this.chatService._disconnect();
     
-    this.session = new Session("",[],[]);
-    this.chatTitle= "";
-    this.chatMessages= [];
-    this.chat = new Chat(null,null,null,[]);
-    this.receiver = new User(0,"","","","");
-    this.disconnected= true;
-    this.connected=false;
-    this.addingChatroom = false;
-    this.token = "";
-    this.newChatroomName = "";
-    this.connected = false;
-    this.disconnected = true;
+    this.router.navigate(['/login']);
   }
 // ---------- LOADING SESSION -------------- START
   loadDirectChats()
   {
-    this.userService.get_all_users().subscribe((cs: User[]) => 
+    this.userService.get_all_contacts().subscribe((cs: User[]) => 
     {
       // console.log("LoadContacts Response:");
       // console.log(cs);
       cs.forEach((c: User) =>
       {
-        if(c.username != this.credentials.username)
+        if(c.username != this.user.username)
         {
           this.session.chats.push(new Chat(c,null,false,[]));
         }
@@ -271,17 +232,11 @@ export class ChatComponent implements OnInit {
 
   sendMessage()
   {
-    // console.log("Trying to send a message");
-    // console.log("sendMessage: this.sendingFile");
-    // console.log(this.sendingFile);
     var date = new Date();
     if(this.newMessageContent!= "" || this.sendingFile)
     {
       var newM = new Message(null,this.user,date.getTime(),this.newMessageContent,this.sendingFile!=true,this.chat.contact,this.chat.chatroom);
-      // console.log("Trying to send message:");
-      // console.log(newM);
       this.userService.send_message(newM).subscribe(r => {
-        // console.log(r);
       })
       this.chat.messages.push(newM);
       this.newMessageContent = "";
@@ -342,16 +297,9 @@ export class ChatComponent implements OnInit {
       })
     }
   }
-
-  downloadFile(message: Message)
-  {
-    // console.log(message);
-  }
   
   handleMessage(message: Message)
   {
-    // console.log(message);
-    
     if(message.receiver!= null)
     {
       this.session.chats.forEach(c => 
@@ -361,7 +309,6 @@ export class ChatComponent implements OnInit {
           c.messages.push(message);
           this.notificationService.showSuccess(message.content,message.sender.username);
         }
-        
       })
     } else if(message.chatroom!= null)
     {
@@ -375,9 +322,8 @@ export class ChatComponent implements OnInit {
         
       })
 
-    } else
+    } else if(message.sender.username == "admin")
     {
-      
       this.notificationService.showSuccess(message.content,"Admin:");
     }
     

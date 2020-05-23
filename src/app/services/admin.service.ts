@@ -1,30 +1,28 @@
 import { Injectable } from '@angular/core';
+import { AdminComponent } from '../components/admin/admin.component';
+import { ConfigService } from '../config/config.service';
 import * as SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
-import { ChatComponent } from '../components/chat/chat.component';
-import { Message } from '../models/message';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { User } from '../models/user';
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
-import { ConfigService } from '../config/config.service';
+import { Message } from '../models/message';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ChatService {
+export class AdminService {
 
+  
   config = new ConfigService();
   stompClient: any;
   credentials: any;
-  chatComponent: ChatComponent;
+  adminComponent: AdminComponent;
   token: string;
   tokenHeader = {};
-  constructor(chatComponent: ChatComponent){
-      this.chatComponent = chatComponent;
+  constructor(adminComponent: AdminComponent){
+      this.adminComponent = adminComponent;
   }
 
-  _connect(user: User) {
+  _connect_admin() {
     console.log("Initialize WebSocket Connection");
     let ws = new SockJS(this.config.WS_SERVER);
     this.stompClient = Stomp.over(ws);
@@ -32,14 +30,13 @@ export class ChatService {
     const _this = this;
     _this.stompClient.connect(this.tokenHeader, function (frame) {
       console.log(frame)
-      _this.stompClient.subscribe(_this.config.topic + user.username, function (sdkEvent) {
+      _this.stompClient.subscribe(_this.config.topic + "admin", function (sdkEvent) {
           _this.onMessageReceived(sdkEvent.body);
       }, this.tokenHeader);
-      _this._listen(user);
+      _this._listen();
     }, this.errorCallBack);
   };
 
-  
   set_authorization(token: string) {
     this.config.set_authorization(token);
   }
@@ -82,9 +79,9 @@ export class ChatService {
   * Send message to sever via web socket
   * @param {*} message 
   */
- _listen(user) {
-  console.log("Try to start listening websockets")
-    this.stompClient.send("/app/receive-message", this.tokenHeader, JSON.stringify(user));
+ _listen() {
+  console.log("Try to start listening websockets Statistics")
+    // this.stompClient.send("/app/receive-message", this.tokenHeader, JSON.stringify(user));
 }
 
   /**
@@ -99,12 +96,9 @@ export class ChatService {
   onMessageReceived(body: string) {
       var message: Message = JSON.parse(body);
       console.log("Message Received from Server :: " + JSON.stringify(message));
-      this.chatComponent.handleMessage(message);
+      this.adminComponent.handleMessage(message);
   }
 
 
 
-
 }
-
-  

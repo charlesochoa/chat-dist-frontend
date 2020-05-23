@@ -30,14 +30,24 @@ export class UserService {
     // console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(newUser));
     return this.httpClient.post<any>(this.config.sign_in, JSON.stringify(newUser),this.config.httpOptions);
   }
+
+  get_profile(username: string){
+    return this.httpClient.get(this.config.USER_CTRL + username,this.config.httpOptions)
+  }
   
   set_authorization(token: string) {
     this.config.set_authorization(token);
   }
 
+
   get_all_users(){
     // console.log(this.config.USER_CTRL + "all/");
     return this.httpClient.get(this.config.USER_CTRL + "all/",this.config.httpOptions);
+  }
+
+  get_all_contacts(){
+    // console.log(this.config.USER_CTRL + "all/");
+    return this.httpClient.get(this.config.USER_CTRL + "all/normal",this.config.httpOptions);
   }
 
   get_all_direct_messages(user: User){
