@@ -375,6 +375,10 @@ export class ChatComponent implements OnInit {
         
       })
 
+    } else
+    {
+      
+      this.notificationService.showSuccess(message.content,"Admin:");
     }
     
   }

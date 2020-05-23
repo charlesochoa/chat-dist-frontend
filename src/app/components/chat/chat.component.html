@@ -21,7 +21,6 @@
             </div>
             <div class="col-sm-4">
               <button type="button" *ngIf="connected" class="btn btn-danger col-sm-12" (click)="logout()">Salir</button>
-              <button type="button" *ngIf="connected" class="btn btn-warning col-sm-12" (click)="listen()">Listen</button>
               <button type="button" *ngIf="disconnected" class="btn btn-warning col-sm-12" (click)="login()">Ingresa</button>
               <label class="col-sm-12"></label>
               <button type="button" *ngIf="disconnected" class="btn btn-info col-sm-12" (click)="sign_up()">Regístrate</button>
