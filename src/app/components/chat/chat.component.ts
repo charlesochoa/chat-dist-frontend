@@ -197,7 +197,7 @@ export class ChatComponent implements OnInit {
           this.session.chats.push(new Chat(c,null,false,[]));
         }
       })
-      this.loadDirectMessages();
+      // this.loadDirectMessages();
       
     })
   }

@@ -30,11 +30,12 @@ export class ChatService {
     this.stompClient = Stomp.over(ws);
     console.log(this.stompClient);
     const _this = this;
-    _this.stompClient.connect({}, function (frame) {
+    _this.stompClient.connect(user, function (frame) {
       console.log(frame)
       _this.stompClient.subscribe(_this.config.topic + user.username, function (sdkEvent) {
           _this.onMessageReceived(sdkEvent.body);
       });
+      _this._listen(user);
     }, this.errorCallBack);
   };
 
@@ -82,7 +83,7 @@ export class ChatService {
   */
  _listen(user) {
   console.log("Try to start listening websockets")
-  this.stompClient.send("app/receive-message", {}, JSON.stringify(user));
+  this.stompClient.send("/app/receive-message", {}, JSON.stringify(user));
 }
 
   /**
