@@ -26,14 +26,12 @@
     <hr style="height:1px;border-width:0;color:gray;background-color:gray">
     <div class="row">
       <div  class="col-sm-4 ex2" >
-          <!-- <label class="col-sm-12">Users</label>
-          <div *ngFor="let chat of session.chats" >
-            <button class="btn col-sm-10" (click)="changeUser(chat)">{{chat.contact.username}}</button>
-            <button (click)="deleteUser(chat.contact)" class="btn btn-danger col-sm-2" >-</button>
+          <label class="col-sm-12">Users</label>
+          <div *ngFor="let u of users" >
+            <button class="btn col-sm-10">{{u.username}}</button>
           </div>
           <label class="col-sm-12">Groups</label>
-          <button *ngFor="let group of session.groups" class=" btn col-sm-12" (click)="changeGroup(group)">{{group.chatroom.name}}</button>
-          <label class="col-sm-12"></label> -->
+          <button *ngFor="let c of chatrooms" class=" btn col-sm-12">{{c.name}}</button>
       </div>
       <div class="col-sm-8" >
         <div class="row">

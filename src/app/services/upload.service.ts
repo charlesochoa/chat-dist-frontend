@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpEvent, HttpErrorResponse, HttpEventType, HttpHeaders } from  '@angular/common/http';  
-
-import { map } from  'rxjs/operators';
+import { HttpClient, HttpHeaders } from  '@angular/common/http';  
 import { ConfigService } from '../config/config.service';
-import { Message } from '../models/message';
 
 @Injectable({
   providedIn: 'root'
@@ -30,10 +27,19 @@ export class UploadService {
   
   set_authorization(token: string) {
     this.config.set_authorization(token); 
-    this.httpOptions.headers.append("Authorization",token);
+      
+    this.httpOptions = {
+      headers: new HttpHeaders({
+        enctype : 'multipart/form-data',
+        observe: 'events',
+        reportProgress: 'true',
+        Authorization: token,
+        
+      })
+    };
   } 
 
-  public download(fileName: string) 
+  public download() 
   {
     // return this.httpClient.get(this.config.FILES_CTRL + "download-file/" + fileName,this.config.httpOptions);
   }

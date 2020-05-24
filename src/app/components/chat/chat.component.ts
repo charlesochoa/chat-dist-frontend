@@ -31,6 +31,7 @@ export class ChatComponent implements OnInit {
   chatService: ChatService;
   chat: Chat;
   newMessageContent: string;
+  newMessageLength: number;
   result: User;
   user: User;
   newChatroomName: string;
@@ -67,6 +68,7 @@ export class ChatComponent implements OnInit {
     this.sendingFile = false;
     this.newChatroomName = "";
     this.newMessageContent = "";
+    this.newMessageLength = 0;
     this.user = new User(null,null,null,null,null,null);
   }
   ngOnInit() {
@@ -107,8 +109,6 @@ export class ChatComponent implements OnInit {
         this.uploadResponse = res;
         this.newMessageContent = this.uploadResponse.fileDownloadUri;
         this.fileSize = this.uploadResponse.size;
-        this.notificationService.showInfo(JSON.stringify(this.uploadResponse),"onSubmit() { uploadResponse}");
-        this.notificationService.showInfo(this.fileSize,"onSubmit() { filesize}");
         this.sendMessage();
       },
       (err) => 
@@ -213,7 +213,6 @@ export class ChatComponent implements OnInit {
 
   sendMessage()
   {
-    this.notificationService.showInfo(this.fileSize,"sendMessage() { filesize}");
     var date = new Date();
     if(this.newMessageContent!= "" || this.sendingFile)
     {
@@ -241,15 +240,9 @@ export class ChatComponent implements OnInit {
     return false;
   }
   
-  addNewChat()
-  {
-    this.addingChatroom = true;
-  }
+  addNewChat() { this.addingChatroom = true; }
 
-  cancelAddNewChat()
-  {
-    this.addingChatroom = false;
-  }
+  cancelAddNewChat() { this.addingChatroom = false; }
 
   createNewGroup()
   {
@@ -257,8 +250,6 @@ export class ChatComponent implements OnInit {
     {
       this.userService.create_group(this.user,new Chatroom(null,this.user,null,this.newChatroomName,null)).subscribe(r => 
         {
-          // console.log("CREATE NEW GROUP RESPONSE");
-          // console.log(r);
           this.session.groups = [];
           this.loadGroups();
           this.newChatroomName = ""
@@ -267,18 +258,21 @@ export class ChatComponent implements OnInit {
 
         });
     }
-    // console.log("TODO: Going to create: ");
-    // console.log(new Chatroom(null,this.user,null,this.newChatroomName,null));
   }
 
   addContactToGroup(contact: User)
   {
     if(this.chat.chatroom!=null){
       this.userService.add_user_to_group(contact,this.chat.chatroom).subscribe(r =>{
-        // console.log(r);
+        this.session.groups = [];
         this.loadGroups();
       })
     }
+  }
+
+
+  onMessageChange(event: any) {
+    this.newMessageLength = event.length;
   }
   
   handleMessage(message: Message)
@@ -305,7 +299,7 @@ export class ChatComponent implements OnInit {
         
       })
 
-    } else if(message.sender.username == "admin")
+    } else if(message.sender!=null && message.sender.username == "admin")
     {
       this.notificationService.showSuccess(message.content,"Admin:");
     }

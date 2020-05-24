@@ -19,3 +19,9 @@ div.ex2 {
     overflow-y: scroll;
     overflow-anchor: auto;
   }
+
+  input.break {
+    word-wrap: break-word;
+    word-break: break-all;
+    height: 80px;
+}

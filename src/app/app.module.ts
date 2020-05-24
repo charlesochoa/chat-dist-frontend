@@ -13,7 +13,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ChatroomComponent } from './components/chatroom/chatroom.component';
 import { ToastrModule } from 'ngx-toastr';
 import { AdminComponent } from './components/admin/admin.component';
 import { LoginComponent } from './components/login/login.component';
@@ -27,7 +26,6 @@ import { LoginComponent } from './components/login/login.component';
   declarations: [
     AppComponent,
     ChatComponent,
-    ChatroomComponent,
     AdminComponent,
     LoginComponent
   ],

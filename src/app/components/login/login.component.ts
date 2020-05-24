@@ -37,7 +37,7 @@ export class LoginComponent implements OnInit {
     this.userService.sign_up(new User(null,this.username,null,this.password,null,[])).subscribe((data: any) => 
     {
       console.log(data);
-      this.notificationService.showSuccess("Usuario creado exitosamente","¡Enhorabuena!");
+      this.notificationService.showSuccess("Usuario creado exitosamente","");
 
     })
   }
@@ -52,7 +52,6 @@ export class LoginComponent implements OnInit {
         console.log(response);
         if(response!=null) 
         {
-          this.notificationService.showSuccess("","¡Enhorabuena!")
           this.token = response["Authorization"];
           console.log(this.token);
           if(this.username=="admin"){
@@ -62,6 +61,10 @@ export class LoginComponent implements OnInit {
           }
         }
 
+      },(error: any) => 
+      {
+        console.log(JSON.stringify(error));
+        this.notificationService.showError("Por favor intente nuevamente","Error de ingreso");
       });
     } else {
       this.notificationService.showError("Los campos no deben estar vacíos", "Error de ingreso");

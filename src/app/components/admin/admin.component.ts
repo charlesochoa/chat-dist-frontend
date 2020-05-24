@@ -22,6 +22,9 @@ import { Statistics } from 'src/app/models/statistics';
   styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {
+  handleMessage(message: Message) {
+    throw new Error("Method not implemented.");
+  }
 
   message: string;
   
@@ -63,6 +66,8 @@ export class AdminComponent implements OnInit {
               private router: Router  ) 
               {
                 this.statistics = new Statistics(null,null,null,null);
+                this.users = [];
+                this.chatrooms = [];
               }
 
   ngOnInit(): void {
@@ -78,13 +83,18 @@ export class AdminComponent implements OnInit {
     }
     this.adminService.set_authorization(this.token);
     this.userService.set_authorization(this.token);
-    this.adminService._connect_admin();
+    this.userService.get_profile(this.route.snapshot.paramMap.get('username')).subscribe((u: any) => {
+                    this.user = u;
+                    this.adminService._connect_admin(this.user);
+                    this.loadDirectChats();
+                    this.loadGroups();
+                  })
   }
   
   sendMessage()
   {
     var date = new Date();
-    this.userService.send_message_to_all(new Message(null,null,date.getTime(),this.message,true,null,null,null))
+    this.userService.send_message_to_all(new Message(null,this.user,date.getTime(),this.message,true,null,null,null))
     .subscribe(r => {
       console.log(r);
     })
@@ -97,43 +107,26 @@ export class AdminComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  changeUser(user: User)
-  {
-
-  }
-
-  changeGroup(group: Chatroom)
-  {
-
-  }
-
-  deleteUser(user: User)
-  {
-
-  }
-
-
   loadDirectChats()
   {
-    this.userService.get_all_contacts().subscribe((cs: User[]) => 
+    this.userService.get_all_contacts().subscribe((us: User[]) => 
     {
-      cs.forEach((c: User) =>
+      us.forEach((u: User) =>
       {
-        if(c.username != this.user.username)
-        {
-          this.session.chats.push(new Chat(c,null,false,[]));
-        }
+        console.log(u);
+        this.users.push(u);
       })
     })
   }
 
   loadGroups()
   {
-    this.userService.get_all_chatrooms().subscribe((chatrooms: any) => 
+    this.userService.get_all_chatrooms().subscribe((chatrooms: Chatroom[]) => 
     {
       chatrooms.forEach((chatroom: Chatroom) => 
       {
-          this.chatrooms.push(chatroom);
+        console.log(chatroom);
+        this.chatrooms.push(chatroom);
       })
     })
   }

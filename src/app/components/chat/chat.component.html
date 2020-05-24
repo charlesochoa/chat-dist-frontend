@@ -41,8 +41,9 @@
               <p *ngIf="message.text==false"><span style="font-weight: bold;">[{{message.time| date :  "dd-MM-y hh:mm" }}] {{message.sender.username}}: </span><a *ngIf="message.text!=true" class="btn btn-warning" href="{{message.content}}" > Descargar ↓ </a></p>
             </div>
           </div>
-          <div   class="form-group">
-            <input type="text" placeholder="Write a message" class="form-control" id="name" required [(ngModel)]="newMessageContent" name="newMessageContent">
+          <div class="form-group">
+            <input class="break" type="text" placeholder="Write a message" class="form-control"  maxlength="500" (ngModelChange)="onMessageChange($event)" id="name" required [(ngModel)]="newMessageContent" name="newMessageContent"/>
+            <label>{{newMessageLength}}/500</label>
           </div>
           
           <button type="submit" class="btn btn-success" (click)="sendMessage()" class="col-sm-6 offset-sm-6">Send!</button>
