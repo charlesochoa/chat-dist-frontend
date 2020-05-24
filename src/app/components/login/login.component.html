@@ -1,7 +1,6 @@
 <div style="padding: 13px;">
     <div class="container">
       <h1 >Login</h1>
-        
         <form #chatForm="ngForm">
           <div class="form-group ">
             <div class="row">
@@ -14,9 +13,9 @@
                 </div>
               </div>
               <div class="col-sm-3">
-                <button type="button" *ngIf="disconnected" class="btn btn-warning col-sm-12" (click)="login()">Ingresa</button>
+                <button type="submit" class="btn btn-warning col-sm-12" (click)="login()">Ingresa</button>
                 <label class="col-sm-12"></label>
-                <button type="button" *ngIf="disconnected" class="btn btn-info col-sm-12" (click)="sign_up()">Regístrate</button>
+                <button type="button" class="btn btn-info col-sm-12" (click)="sign_up()">Regístrate</button>
               </div>
             </div>
           </div>

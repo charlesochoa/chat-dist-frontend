@@ -1,28 +1,61 @@
 <div style="padding: 13px;">
-    <div class="container">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-3" >
         <div class="row">
-            <div class="col-sm-3" >
-              <div class="row">
-                <label for="to">Administrador</label> 
-              </div>
-            </div>
-            <div class="col-sm-4">
-              <button type="button" class="btn btn-danger col-sm-12">Salir</button>
+          <label for="to">Administrador</label> 
         </div>
-        <div  class="col-sm-12" >
-  
-            <form   #chatForm="ngForm">
-              <div class="form-group">
-                <label for="to">Mensaje a comunidad:</label>
-              </div>
-              <div   class="form-group">
-                <input type="text" placeholder="Escriba un mensaje" class="form-control" required [(ngModel)]="message" id="message" name="message">
-              </div>
-              
-              <button type="submit" class="btn btn-success" (click)="sendMessage()" class="col-sm-6 offset-sm-6">Send!</button>
-             
-            </form>
-            
-        </div>
+      </div>
+      <div class="col-sm-4">
+        <button type="button" class="btn btn-danger col-sm-12" (click)="logout()">Salir</button>
+      </div>
     </div>
-</div>  
+    <hr style="height:1px;border-width:0;color:gray;background-color:gray">
+    <div class="row">
+      <div  class="col-sm-4" >
+      </div>
+      <div class="col-sm-8" >
+        <div class="row">
+          <label class="col-sm-3">Chatrooms Activos</label>
+          <label class="col-sm-3">Usuarios Online</label>
+          <label class="col-sm-3">Mensajes por minuto</label>
+          <label class="col-sm-3">Bytes por minuto</label>
+        </div>
+      </div>
+    </div>
+    <hr style="height:1px;border-width:0;color:gray;background-color:gray">
+    <div class="row">
+      <div  class="col-sm-4 ex2" >
+          <!-- <label class="col-sm-12">Users</label>
+          <div *ngFor="let chat of session.chats" >
+            <button class="btn col-sm-10" (click)="changeUser(chat)">{{chat.contact.username}}</button>
+            <button (click)="deleteUser(chat.contact)" class="btn btn-danger col-sm-2" >-</button>
+          </div>
+          <label class="col-sm-12">Groups</label>
+          <button *ngFor="let group of session.groups" class=" btn col-sm-12" (click)="changeGroup(group)">{{group.chatroom.name}}</button>
+          <label class="col-sm-12"></label> -->
+      </div>
+      <div class="col-sm-8" >
+        <div class="row">
+          <label class="col-sm-3">{{statistics.activeChatrooms}}</label>
+          <label class="col-sm-3">{{statistics.activeUsers}}</label>
+          <label class="col-sm-3">{{statistics.messagesPerMinute}}</label>
+          <label class="col-sm-3">{{statistics.bytesPerMinute}}</label>
+        </div>
+      </div>
+    </div>
+    <hr style="height:1px;border-width:0;color:gray;background-color:gray">
+
+    <div  class="col-sm-12" >
+        <form   #chatForm="ngForm">
+          <div class="form-group">
+            <label for="to">Mensaje a comunidad:</label>
+          </div>
+          <div   class="form-group">
+            <input type="text" placeholder="Escriba un mensaje" class="form-control" required [(ngModel)]="message" id="message" name="message">
+          </div>
+          <button type="submit" class="btn btn-success" (click)="sendMessage()" class="col-sm-6 offset-sm-6">Send!</button>
+        </form>
+    </div>
+  </div>
+</div>

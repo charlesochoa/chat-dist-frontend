@@ -41,11 +41,8 @@ export class ChatService {
 
   
   set_authorization(token: string) {
-    this.config.set_authorization(token);
-  }
-
-  set_token(token: string){
     this.token = token;
+    this.config.set_authorization(token);
     this.tokenHeader = {'Authorization': this.token};
   }
 
@@ -66,34 +63,14 @@ export class ChatService {
       }, 5000);
   }
 
-  /**
-  * Send message to sever via web socket
-  * @param {*} message 
-  */
-//  _send(message) {
-//   console.log("SEND DIRECT JSON.stringify(message)");
-//   console.log(JSON.stringify(message));
-//   this.stompClient.send(this.config.WS_DIR_MESSAGE_CTRL + 
-//     "send-direct-message", this.config.httpOptions, JSON.stringify(message));
-//   }
-
 
   /**
-  * Send message to sever via web socket
-  * @param {*} message 
+  * Start listener of messages in server
+  * @param {*} user 
   */
  _listen(user) {
   console.log("Try to start listening websockets")
     this.stompClient.send("/app/receive-message", this.tokenHeader, JSON.stringify(user));
-}
-
-  /**
-  * Send message to sever via web socket
-  * @param {*} message 
-  */
- test(message) {
-  console.log("Try to start listening websockets")
-  this.stompClient.send("app/chat.sendMessage", this.tokenHeader, JSON.stringify(message));
 }
 
   onMessageReceived(body: string) {

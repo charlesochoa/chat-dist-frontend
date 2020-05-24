@@ -7,12 +7,14 @@ import { UploadService } from 'src/app/services/upload.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChatService } from 'src/app/services/chat.service';
-import { Session } from 'inspector';
 import { Chat } from 'src/app/models/chat';
 import { Credentials } from 'src/app/models/credentials';
 import { User } from 'src/app/models/user';
 import { UploadResponse } from 'src/app/models/upload-response';
 import { AdminService } from 'src/app/services/admin.service';
+import { Session } from 'src/app/models/session';
+import { Chatroom } from 'src/app/models/chatroom';
+import { Statistics } from 'src/app/models/statistics';
 
 @Component({
   selector: 'app-admin',
@@ -20,13 +22,11 @@ import { AdminService } from 'src/app/services/admin.service';
   styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {
-  handleMessage(message: any) {
-    throw new Error("Method not implemented.");
-  }
 
   message: string;
   
   session: Session;
+  statistics: Statistics;
   adminService: AdminService;
   chat: Chat;
   credentials: Credentials;
@@ -34,6 +34,8 @@ export class AdminComponent implements OnInit {
   newMessageContent: string;
   result: User;
   user: User;
+  users: User[];
+  chatrooms: Chatroom[];
   newChatroomName: string;
   token: string;
   password: string;
@@ -50,6 +52,7 @@ export class AdminComponent implements OnInit {
   sendingFile: boolean;
   fileName: string;
   fileUrl: SafeResourceUrl;
+  inspected: string;
   uploadResponse = new UploadResponse("","","",null);
   constructor(private formBuilder: FormBuilder,
               private userService: UserService, 
@@ -57,7 +60,10 @@ export class AdminComponent implements OnInit {
               private uploadService: UploadService,
               private sanitizer: DomSanitizer,
               private route: ActivatedRoute,
-              private router: Router  ) { }
+              private router: Router  ) 
+              {
+                this.statistics = new Statistics(null,null,null,null);
+              }
 
   ngOnInit(): void {
     this.adminService = new AdminService(this);
@@ -70,20 +76,15 @@ export class AdminComponent implements OnInit {
     if(this.username==undefined || this.token==undefined){
       this.router.navigate(['/login']);
     }
-    this.adminService.set_token(this.token);
-    this.userService.set_token(this.token);
     this.adminService.set_authorization(this.token);
     this.userService.set_authorization(this.token);
-    this.userService.get_profile(this.username).subscribe((u: any) => {
-                    this.user = u;
-                    this.adminService._connect_admin();
-                  })
+    this.adminService._connect_admin();
   }
   
   sendMessage()
   {
     var date = new Date();
-    this.userService.send_message_to_all(new Message(null,null,date.getTime(),this.message,true,null,null))
+    this.userService.send_message_to_all(new Message(null,null,date.getTime(),this.message,true,null,null,null))
     .subscribe(r => {
       console.log(r);
     })
@@ -95,5 +96,51 @@ export class AdminComponent implements OnInit {
     
     this.router.navigate(['/login']);
   }
+
+  changeUser(user: User)
+  {
+
+  }
+
+  changeGroup(group: Chatroom)
+  {
+
+  }
+
+  deleteUser(user: User)
+  {
+
+  }
+
+
+  loadDirectChats()
+  {
+    this.userService.get_all_contacts().subscribe((cs: User[]) => 
+    {
+      cs.forEach((c: User) =>
+      {
+        if(c.username != this.user.username)
+        {
+          this.session.chats.push(new Chat(c,null,false,[]));
+        }
+      })
+    })
+  }
+
+  loadGroups()
+  {
+    this.userService.get_all_chatrooms().subscribe((chatrooms: any) => 
+    {
+      chatrooms.forEach((chatroom: Chatroom) => 
+      {
+          this.chatrooms.push(chatroom);
+      })
+    })
+  }
+
+  updateStatistics(statistics: Statistics){
+    this.statistics = statistics;
+  }
+
 
 }

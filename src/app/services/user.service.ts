@@ -56,9 +56,14 @@ export class UserService {
   }
 
 
-  get_all_chatrooms(user: User){
+  get_my_chatrooms(user: User){
     // console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(user));
     return this.httpClient.get(this.config.CHATROOM_CTRL + "all/" + user.id,this.config.httpOptions);
+  }
+
+  get_all_chatrooms(){
+    // console.log("login services: " + this.config.sign_in + " User: " + JSON.stringify(user));
+    return this.httpClient.get(this.config.CHATROOM_CTRL + "all",this.config.httpOptions);
   }
 
 

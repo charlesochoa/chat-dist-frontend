@@ -30,28 +30,23 @@ export class ChatComponent implements OnInit {
   session: Session;
   chatService: ChatService;
   chat: Chat;
-  credentials: Credentials;
-  newMessage : Message;
   newMessageContent: string;
   result: User;
   user: User;
   newChatroomName: string;
   token: string;
-  password: string;
   receiver: User;
   chatTitle: string;
   chatMessages: Message[];
-  disconnected: boolean;
-  connected: boolean;
   addingChatroom: boolean;
-  username: string;
   selectedFiles: File[];
   form: FormGroup;
   error: string;
   sendingFile: boolean;
   fileName: string;
+  fileSize: number;
   fileUrl: SafeResourceUrl;
-  uploadResponse = new UploadResponse("","","",null);
+  uploadResponse: UploadResponse;
 
   constructor(private formBuilder: FormBuilder,
               private userService: UserService, 
@@ -68,14 +63,11 @@ export class ChatComponent implements OnInit {
     this.chatMessages= [];
     this.chat = new Chat(new User(null,"","","","",[]),null,null,[]);
     this.receiver = new User(0,"","","","",[]);
-    this.disconnected= true;
-    this.connected=false;
     this.addingChatroom = false;
-    this.password = "12345";
     this.sendingFile = false;
     this.newChatroomName = "";
-    this.newMessage = new Message(null,this.user,null,null,null,null,null);
     this.newMessageContent = "";
+    this.user = new User(null,null,null,null,null,null);
   }
   ngOnInit() {
     this.chatService = new ChatService(this);
@@ -83,16 +75,14 @@ export class ChatComponent implements OnInit {
       file: ['']
     });
     this.token = this.route.snapshot.paramMap.get('token');
-    this.username = this.route.snapshot.paramMap.get('username');
 
-    if(this.username==undefined || this.token==undefined){
+    if(this.route.snapshot.paramMap.get('username')==undefined || this.token==undefined){
       this.router.navigate(['/login']);
     }
-    this.chatService.set_token(this.token);
-    this.userService.set_token(this.token);
+    this.uploadService.set_authorization(this.token);
     this.chatService.set_authorization(this.token);
     this.userService.set_authorization(this.token);
-    this.userService.get_profile(this.username).subscribe((u: any) => {
+    this.userService.get_profile(this.route.snapshot.paramMap.get('username')).subscribe((u: any) => {
                     this.user = u;
                     this.chatService._connect(this.user);
                     this.loadDirectChats();
@@ -114,28 +104,19 @@ export class ChatComponent implements OnInit {
     this.uploadService.upload(formData).subscribe(
       (res: UploadResponse) => 
       {
-        // console.log(res);
         this.uploadResponse = res;
         this.newMessageContent = this.uploadResponse.fileDownloadUri;
+        this.fileSize = this.uploadResponse.size;
+        this.notificationService.showInfo(JSON.stringify(this.uploadResponse),"onSubmit() { uploadResponse}");
+        this.notificationService.showInfo(this.fileSize,"onSubmit() { filesize}");
         this.sendMessage();
       },
       (err) => 
       {
         this.sendingFile = false;
         this.notificationService.showError( JSON.stringify(err),"Error");
-        // console.log(err)
       }
     );
-  }
-
-  sign_up()
-  {
-    this.userService.sign_up(new User(null,this.username,null,this.password,null,[])).subscribe((data: User) => 
-    {
-      this.user = data;
-      this.notificationService.showSuccess("Usuario creado con éxito","");
-
-    })
   }
 
   logout()
@@ -185,7 +166,7 @@ export class ChatComponent implements OnInit {
   }
   loadGroups()
   {
-    this.userService.get_all_chatrooms(this.user).subscribe((chatrooms: any) => 
+    this.userService.get_my_chatrooms(this.user).subscribe((chatrooms: any) => 
     {
       // console.log("chatrooms:");
       // console.log(chatrooms);
@@ -232,15 +213,17 @@ export class ChatComponent implements OnInit {
 
   sendMessage()
   {
+    this.notificationService.showInfo(this.fileSize,"sendMessage() { filesize}");
     var date = new Date();
     if(this.newMessageContent!= "" || this.sendingFile)
     {
-      var newM = new Message(null,this.user,date.getTime(),this.newMessageContent,this.sendingFile!=true,this.chat.contact,this.chat.chatroom);
+      var newM = new Message(null,this.user,date.getTime(),this.newMessageContent,this.sendingFile!=true,this.chat.contact,this.chat.chatroom,this.fileSize);
       this.userService.send_message(newM).subscribe(r => {
+        this.chat.messages.push(newM);
+        this.newMessageContent = "";
+        this.fileSize = null;
+        this.sendingFile = false;
       })
-      this.chat.messages.push(newM);
-      this.newMessageContent = "";
-      this.sendingFile = false;
     }
     else 
     {

@@ -8,7 +8,7 @@ import { Message } from '../models/message';
 @Injectable({
   providedIn: 'root'
 })
-export class UploadService { 
+export class UploadService {
 
   config = new ConfigService();
 
@@ -27,6 +27,11 @@ export class UploadService {
     return this.httpClient.post<any>(this.config.FILES_CTRL + "upload", data,this.httpOptions);
     
   }
+  
+  set_authorization(token: string) {
+    this.config.set_authorization(token); 
+    this.httpOptions.headers.append("Authorization",token);
+  } 
 
   public download(fileName: string) 
   {

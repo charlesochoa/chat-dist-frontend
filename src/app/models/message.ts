@@ -10,6 +10,6 @@ export class Message {
       public text: boolean,
       public receiver: User,
       public chatroom: Chatroom,
-
+      public bytes: number,
     ) {  }
 }
