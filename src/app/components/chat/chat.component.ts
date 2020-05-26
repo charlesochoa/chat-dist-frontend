@@ -324,7 +324,7 @@ export class ChatComponent implements OnInit {
           this.loadGroupMessages();
           this.notificationService.showSuccess(message.content,message.chatroom.name + ": " + message.sender.username);
         }
-      } else if(message.sender==null && message.chatroom==null){
+      } else if(message.receiver==null && message.chatroom==null){
         this.notificationService.showSuccess(message.content,"ChatDist admin:");
       }
     }
