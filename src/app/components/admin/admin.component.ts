@@ -22,9 +22,6 @@ import { Statistics } from 'src/app/models/statistics';
   styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {
-  handleMessage(message: Message) {
-    throw new Error("Method not implemented.");
-  }
 
   message: string;
   
@@ -65,7 +62,7 @@ export class AdminComponent implements OnInit {
               private route: ActivatedRoute,
               private router: Router  ) 
               {
-                this.statistics = new Statistics(null,null,null,null);
+                this.statistics = new Statistics(null,null,null,null,null,null,null,null,null,null);
                 this.users = [];
                 this.chatrooms = [];
               }

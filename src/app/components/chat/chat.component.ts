@@ -220,6 +220,7 @@ export class ChatComponent implements OnInit {
       this.userService.send_message(newM).subscribe(r => {
         this.chat.messages.push(newM);
         this.newMessageContent = "";
+        this.newMessageLength = 0;
         this.fileSize = null;
         this.sendingFile = false;
       })
@@ -250,6 +251,8 @@ export class ChatComponent implements OnInit {
     {
       this.userService.create_group(this.user,new Chatroom(null,this.user,null,this.newChatroomName,null)).subscribe(r => 
         {
+          this.session.chats = [];
+          this.loadDirectChats();
           this.session.groups = [];
           this.loadGroups();
           this.newChatroomName = ""

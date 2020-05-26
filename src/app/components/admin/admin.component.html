@@ -12,35 +12,39 @@
     </div>
     <hr style="height:1px;border-width:0;color:gray;background-color:gray">
     <div class="row">
-      <div  class="col-sm-4" >
-      </div>
-      <div class="col-sm-8" >
+      <div class="col-sm-12" >
         <div class="row">
-          <label class="col-sm-3">Chatrooms Activos</label>
-          <label class="col-sm-3">Usuarios Online</label>
-          <label class="col-sm-3">Mensajes por minuto</label>
-          <label class="col-sm-3">Bytes por minuto</label>
+          <label class="col-sm-2">Usuarios Online</label>
+          <label class="col-sm-2">Chats Activos</label>
+          <label class="col-sm-2">Mensajes (última hora)</label>
+          <label class="col-sm-2">Mensajes (último día)</label>
+          <label class="col-sm-2">Mensajes (todos)</label>
         </div>
       </div>
     </div>
     <hr style="height:1px;border-width:0;color:gray;background-color:gray">
     <div class="row">
-      <div  class="col-sm-4 ex2" >
-          <label class="col-sm-12">Users</label>
-          <div *ngFor="let u of users" >
-            <button class="btn col-sm-10">{{u.username}}</button>
-          </div>
-          <label class="col-sm-12">Groups</label>
-          <button *ngFor="let c of chatrooms" class=" btn col-sm-12">{{c.name}}</button>
-      </div>
-      <div class="col-sm-8" >
-        <div class="row">
-          <label class="col-sm-3">{{statistics.activeChatrooms}}</label>
-          <label class="col-sm-3">{{statistics.activeUsers}}</label>
-          <label class="col-sm-3">{{statistics.messagesPerMinute}}</label>
-          <label class="col-sm-3">{{statistics.bytesPerMinute}}</label>
-        </div>
-      </div>
+      <p class="col-sm-2">{{statistics.activeUsers}}</p>
+      <p class="col-sm-2">{{statistics.activeChatrooms}}</p>
+      <p class="col-sm-2">{{statistics.messagesLastHour}}</p>
+      <p class="col-sm-2 ">{{statistics.messagesLastDay}}</p>
+      <p class="col-sm-2 ">{{statistics.messagesAllTime}}</p>
+    </div>
+    <hr style="height:1px;border-width:0;color:gray;background-color:gray">
+    <div class="row">
+      <label class="col-sm-2">Mensajes promedio (por minuto)</label>
+      <label class="col-sm-2">Bytes promedio (por minuto)</label>
+      <label class="col-sm-2">Bytes (última hora)</label>
+      <label class="col-sm-2">Bytes (último día)</label>
+      <label class="col-sm-2">Bytes (todos)</label>
+    </div>
+    <hr style="height:1px;border-width:0;color:gray;background-color:gray">
+    <div class="row">
+      <p class="col-sm-2">{{statistics.messagesPerMinute | number : '1.2-2'}}</p>
+      <p class="col-sm-2 ">{{statistics.bytesPerMinute | number : '1.2-2'}}</p>
+      <p class="col-sm-2">{{statistics.bytesLastHour}}</p>
+      <p class="col-sm-2">{{statistics.bytesLastDay}}</p>
+      <p class="col-sm-2">{{statistics.bytesAllTime}}</p>
     </div>
     <hr style="height:1px;border-width:0;color:gray;background-color:gray">
 

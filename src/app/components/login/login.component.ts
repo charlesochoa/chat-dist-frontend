@@ -38,6 +38,8 @@ export class LoginComponent implements OnInit {
     {
       console.log(data);
       this.notificationService.showSuccess("Usuario creado exitosamente","");
+      this.password="";
+      this.username="";
 
     })
   }
@@ -55,9 +57,9 @@ export class LoginComponent implements OnInit {
           this.token = response["Authorization"];
           console.log(this.token);
           if(this.username=="admin"){
-            this.router.navigate(['/admin',{ token: this.token , username: this.username}])
+            this.router.navigate(['/admin',{ token: this.token , username: this.username}]);
           } else {
-            this.router.navigate(['/chat',{ token: this.token , username: this.username}])
+            this.router.navigate(['/chat',{ token: this.token , username: this.username}]);
           }
         }
 

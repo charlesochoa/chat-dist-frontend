@@ -82,11 +82,6 @@ export class AdminService {
     this.stompClient.send("/app/receive-message", this.tokenHeader, JSON.stringify(user));
 }
 
-  onMessageReceived(body: string) {
-      var message: Message = JSON.parse(body);
-      console.log("Message Received from Server :: " + JSON.stringify(message));
-      this.adminComponent.handleMessage(message);
-  }
 
   onStatisticReceived(body: string) {
       var statistics: Statistics = JSON.parse(body);

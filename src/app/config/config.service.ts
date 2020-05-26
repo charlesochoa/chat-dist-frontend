@@ -9,18 +9,22 @@ export class ConfigService {
 
   
   // Develop
-  // WS_SERVER = 'http://192.168.1.135:8080/ws/';
-  // SERVER = 'http://192.168.1.135:8080/';
-  //WS_SERVER = 'http://localhost:8080/ws/';
-  //SERVER = 'http://localhost:8080/';
+  // WS_SERVER = 'http://192.168.1.149:8080/ws/';
+  // SERVER = 'http://192.168.1.149:8080/';
+  ///UPLOAD_SERVER = 'http://192.168.1.149:8080/';
+
+  // WS_SERVER = 'http://localhost:8080/ws/';
+  // SERVER = 'http://localhost:8080/';
+  // UPLOAD_SERVER = 'http://localhost:8080/';
   // Production
-   WS_SERVER = "https://chat-dist-backend.herokuapp.com/ws";
-   SERVER = "https://chat-dist-backend.herokuapp.com/"
+  WS_SERVER = "https://chat-dist-backend.herokuapp.com/ws";
+  SERVER = "https://chat-dist-backend.herokuapp.com/";
+  UPLOAD_SERVER = "https://chat-dist-file-storage.herokuapp.com/";
   AUX_CTRL = this.SERVER + "";
   AUTH_CTRL = this.SERVER + "auth/";
   DIR_MESSAGE_CTRL = this.SERVER + "direct-messages/";
   GROUP_MESSAGE_CTRL = this.SERVER + "group-messages/";
-  FILES_CTRL = this.SERVER + "files/";
+  FILES_CTRL = this.UPLOAD_SERVER + "files/";
   CHATROOM_CTRL = this.SERVER + "chatrooms/";
   USER_CTRL = this.SERVER + "users/";
   sign_up = this.AUTH_CTRL + "sign-up"
