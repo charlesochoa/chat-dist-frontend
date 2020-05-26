@@ -11,7 +11,7 @@ export class ConfigService {
   // Develop
   // WS_SERVER = 'http://192.168.1.149:8080/ws/';
   // SERVER = 'http://192.168.1.149:8080/';
-  ///UPLOAD_SERVER = 'http://192.168.1.149:8080/';
+  // UPLOAD_SERVER = 'http://192.168.1.149:8080/';
 
   // WS_SERVER = 'http://localhost:8080/ws/';
   // SERVER = 'http://localhost:8080/';

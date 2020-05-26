@@ -75,7 +75,6 @@ export class ChatService {
 
   onMessageReceived(body: string) {
       var message: Message = JSON.parse(body);
-      console.log("Message Received from Server :: " + JSON.stringify(message));
       this.chatComponent.handleMessage(message);
   }
 

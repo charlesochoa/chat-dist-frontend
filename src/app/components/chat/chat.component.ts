@@ -17,6 +17,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { UploadResponse } from 'src/app/models/upload-response';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
+import { group } from '@angular/animations';
 
 
 @Component({
@@ -217,7 +218,10 @@ export class ChatComponent implements OnInit {
     if(this.newMessageContent!= "" || this.sendingFile)
     {
       var newM = new Message(null,this.user,date.getTime(),this.newMessageContent,this.sendingFile!=true,this.chat.contact,this.chat.chatroom,this.fileSize);
+      console.log("MESSAGE SENT:");
+      console.log(newM);
       this.userService.send_message(newM).subscribe(r => {
+        
         this.chat.messages.push(newM);
         this.newMessageContent = "";
         this.newMessageLength = 0;
@@ -267,8 +271,16 @@ export class ChatComponent implements OnInit {
   {
     if(this.chat.chatroom!=null){
       this.userService.add_user_to_group(contact,this.chat.chatroom).subscribe(r =>{
+        this.notificationService.showSuccess("Usuario agregado al grupo: " + this.chat.chatroom.name,"");
+        this.session = new Session("",[],[]);
+        this.chatTitle= "";
+        this.chatMessages= [];
+        this.chat = new Chat(new User(null,"","","","",[]),null,null,[]);
+        this.session.chats = [];
+        this.loadDirectChats();
         this.session.groups = [];
         this.loadGroups();
+
       })
     }
   }
@@ -280,33 +292,42 @@ export class ChatComponent implements OnInit {
   
   handleMessage(message: Message)
   {
-    if(message.receiver!= null)
-    {
-      this.session.chats.forEach(c => 
-      {
-        if(c.contact.username == message.sender.username)
-        {
-          c.messages.push(message);
-          this.notificationService.showSuccess(message.content,message.sender.username);
-        }
-      })
-    } else if(message.chatroom!= null)
-    {
-      this.session.groups.forEach(g => 
-      {
-        if(g.chatroom.name == message.chatroom.name)
-        {
-          g.messages.push(message);
-          this.notificationService.showSuccess(message.content,message.chatroom.name);
-        }
-        
-      })
+    console.log("Message received!");
+    console.log(message.chatroom);
+    console.log("Message received! is there a chatroom?");
+    console.log(message.chatroom!=null);
+    if(message.sender!= null && message.sender.username != this.user.username){
+      console.log("Is not sender null and is not me");
+      if(message.receiver!=null && message.receiver.username==this.user.username){
+        console.log("Is not receiver null and I am de receiver");
+        this.session.chats.forEach(chat => {
+          if(chat.contact.username == message.sender.username){
+            console.log("Message appended to my view");
+            chat.messages.push(message);
+            this.notificationService.showSuccess(message.content,message.sender.username);
+          }
+        });
 
-    } else if(message.sender!=null && message.sender.username == "admin")
-    {
-      this.notificationService.showSuccess(message.content,"Admin:");
+      } else if(message.chatroom!= null){
+        console.log("Chatroom is not null");
+        var groupFound = false;
+        this.session.groups.forEach(group => {
+          if(!groupFound && group.chatroom.name == message.chatroom.name){
+            group.messages.push(message);
+            console.log("Chatroom is found so message is appended to my view");
+            this.notificationService.showSuccess(message.content,message.chatroom.name + ": " + message.sender.username);
+            groupFound = true;
+          }
+        });
+        if(!groupFound){
+          this.session.groups = [];
+          this.loadGroupMessages();
+          this.notificationService.showSuccess(message.content,message.chatroom.name + ": " + message.sender.username);
+        }
+      } else if(message.sender==null && message.chatroom==null){
+        this.notificationService.showSuccess(message.content,"ChatDist admin:");
+      }
     }
-    
   }
   
 }

@@ -28,15 +28,6 @@ export class UploadService {
   set_authorization(token: string) {
     this.config.set_authorization(token); 
       
-    this.httpOptions = {
-      headers: new HttpHeaders({
-        enctype : 'multipart/form-data',
-        observe: 'events',
-        reportProgress: 'true',
-        Authorization: token,
-        
-      })
-    };
   } 
 
   public download() 

@@ -94,6 +94,7 @@ export class AdminComponent implements OnInit {
     this.userService.send_message_to_all(new Message(null,this.user,date.getTime(),this.message,true,null,null,null))
     .subscribe(r => {
       console.log(r);
+      this.message = "";
     })
   }
   

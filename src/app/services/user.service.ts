@@ -81,9 +81,13 @@ export class UserService {
   send_message(message: Message)
   {
     if(message.chatroom!=null){
+      console.log("Sending group message in service");
+      console.log(message);
+      console.log(JSON.stringify(message));
       return this.httpClient.post(this.config.GROUP_MESSAGE_CTRL + "send/" + message.chatroom.id,JSON.stringify(message),this.config.httpOptions)
  
     } else {
+
       return this.httpClient.post(this.config.DIR_MESSAGE_CTRL + "send",JSON.stringify(message),this.config.httpOptions)
 
     }
