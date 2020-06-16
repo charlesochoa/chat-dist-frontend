@@ -28,15 +28,15 @@ export class ChatService {
     console.log("Initialize WebSocket Connection");
     let ws = new SockJS(this.config.WS_SERVER);
     this.stompClient = Stomp.over(ws);
-    console.log(this.stompClient);
+    // console.log(this.stompClient);
     const _this = this;
     _this.stompClient.connect(this.tokenHeader, function (frame) {
-      console.log(frame)
+      // console.log(frame)
       _this.stompClient.subscribe(_this.config.topic + user.username, function (sdkEvent) {
           _this.onMessageReceived(sdkEvent.body);
       }, this.tokenHeader);
       _this._listen(user);
-    }, this.errorCallBack);
+    }, function(message) {});
   };
 
   
@@ -47,7 +47,7 @@ export class ChatService {
   }
 
   _disconnect() {
-      console.log(this.stompClient);
+      // console.log(this.stompClient);
       if (this.stompClient !== null && this.stompClient !== undefined && this.stompClient.connected) {
           this.stompClient.disconnect();
           console.log("Disconnected");
@@ -69,7 +69,7 @@ export class ChatService {
   * @param {*} user 
   */
  _listen(user) {
-  console.log("Try to start listening websockets")
+  // console.log("Try to start listening websockets")
     this.stompClient.send("/app/receive-message", this.tokenHeader, JSON.stringify(user));
 }
 

@@ -15,6 +15,7 @@ import { AdminService } from 'src/app/services/admin.service';
 import { Session } from 'src/app/models/session';
 import { Chatroom } from 'src/app/models/chatroom';
 import { Statistics } from 'src/app/models/statistics';
+import { MessageType } from 'src/app/models/message-type';
 
 @Component({
   selector: 'app-admin',
@@ -91,7 +92,7 @@ export class AdminComponent implements OnInit {
   sendMessage()
   {
     var date = new Date();
-    this.userService.send_message_to_all(new Message(null,this.user,date.getTime(),this.message,true,null,null,null))
+    this.userService.send_message_to_all(new Message(null,this.user,date.getTime(),this.message,MessageType.MESSAGE,null,null,null))
     .subscribe(r => {
       console.log(r);
       this.message = "";

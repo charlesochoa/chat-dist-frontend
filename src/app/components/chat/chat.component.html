@@ -14,13 +14,21 @@
     <br>
     <div class="row">
       <div  class="col-sm-4 ex2" >
-          <label class="col-sm-12">Contacts</label>
+        <button *ngIf="chatTitle!='ChatDist Sistema'" class="col-sm-9" mat-flat-button (click)="showAdminMessages()">ChatDist Sistema</button>
+        <button *ngIf="chatTitle=='ChatDist Sistema'" class="col-sm-9" mat-flat-button color="primary" >ChatDist Sistema</button>
+        
+          <label class="col-sm-12">Contactos</label>
           <div *ngFor="let chat of session.chats" >
-            <button class="btn col-sm-10" (click)="changeChat(chat)">{{chat.contact.username}}</button>
-            <button *ngIf="notInvited(chat.contact)" (click)="addContactToGroup(chat.contact)" class="btn btn-success col-sm-2" >+</button>
+            <button *ngIf="inGroup(chat.contact)" class="col-sm-9 offset-md-1" mat-flat-button color="primary" (click)="changeChat(chat)">{{chat.contact.username}}</button>
+            <button *ngIf="notInGroup(chat.contact)" class="col-sm-9 offset-md-1" mat-flat-button (click)="changeChat(chat)">{{chat.contact.username}}</button>
+            <button *ngIf="notInvited(chat.contact)" (click)="addContactToGroup(chat.contact)" class="btn btn-info col-sm-2" >+</button>
+            <button *ngIf="invited(chat.contact)" (click)="removeContactFromGroup(chat.contact)" class="btn btn-danger col-sm-2" >-</button>
           </div>
-          <label class="col-sm-12">Groups</label>
-          <button *ngFor="let group of session.groups" class=" btn col-sm-12" (click)="changeChat(group)">{{group.chatroom.name}}</button>
+          <label class="col-sm-12">Grupos</label>
+          <div *ngFor="let group of session.groups" >
+            <button class="col-sm-9 offset-md-1" mat-flat-button (click)="changeChat(group)">{{group.chatroom.name}}</button>
+            <button *ngIf="group.chatroom.admin.username == user.username" (click)="deleteGroup(group.chatroom)" class="btn btn-danger col-sm-2" >-</button>
+          </div>
           <label class="col-sm-12"></label>
           <form #chatroomForm="ngForm">
             <input *ngIf="addingChatroom" type="text" placeholder="Nuevo grupo" class="form-control" id="newChatroomName" required [(ngModel)]="newChatroomName" name="newChatroomName">
@@ -37,22 +45,22 @@
           </div>
           <div class="form-group ex1">
             <div *ngFor="let message of chatMessages">
-              <p *ngIf="message.text==true"><span style="font-weight: bold;">[{{message.time| date :  "dd-MM-y hh:mm" }}] {{message.sender.username}}: </span>{{message.content}} </p>
-              <p *ngIf="message.text==false"><span style="font-weight: bold;">[{{message.time| date :  "dd-MM-y hh:mm" }}] {{message.sender.username}}: </span><a *ngIf="message.text!=true" class="btn btn-warning" href="{{message.content}}" > Descargar ↓ </a></p>
+              <p *ngIf="message.contentType=='MESSAGE'"><span style="font-weight: bold;">[{{message.time| date :  "dd-MM-y hh:mm" }}] {{message.sender.username}}: </span>{{message.content}} </p>
+              <p *ngIf="message.contentType=='FILE'"><span style="font-weight: bold;">[{{message.time| date :  "dd-MM-y hh:mm" }}] {{message.sender.username}}: </span><a *ngIf="message.text!=true" class="btn btn-warning" href="{{message.content}}" > Descargar ↓ </a></p>
             </div>
           </div>
-          <div class="form-group">
+          <div  *ngIf="chatTitle!='ChatDist Sistema'" class="form-group">
             <input class="break" type="text" placeholder="Write a message" class="form-control"  maxlength="500" (ngModelChange)="onMessageChange($event)" id="name" required [(ngModel)]="newMessageContent" name="newMessageContent"/>
             <label>{{newMessageLength}}/500</label>
           </div>
           
-          <button type="submit" class="btn btn-success" (click)="sendMessage()" class="col-sm-6 offset-sm-6">Send!</button>
+          <button  *ngIf="chatTitle!='ChatDist Sistema'" type="submit" class="btn btn-success" (click)="sendMessage()" class="col-sm-6 offset-sm-6">Enviar</button>
           
         </form>
-        <div class="row">
+        <div  *ngIf="chatTitle!='ChatDist Sistema'" class="row">
           <form [formGroup]="form" (ngSubmit)="onSubmit()"  class="col-sm-12" *ngIf="chatTitle!=''" #chatForm="ngForm">
             
-            <button type="submit" class="col-sm-6" >Upload</button>
+            <button type="submit" class="col-sm-6" >Subir</button>
             <input type="file"  id="fileUpload" name="fileUpload" class="col-sm-6" name="file" (change)="onFileChange($event)" />
           </form>
         </div>
@@ -60,4 +68,4 @@
       </div>
     </div>
   </div>
-</div>  
+</div>

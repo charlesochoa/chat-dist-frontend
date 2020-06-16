@@ -7,12 +7,12 @@ import { throwError, Observable } from 'rxjs';
 import { Credentials } from '../models/credentials';
 import { Chatroom } from '../models/chatroom';
 import { Message } from '../models/message';
+import { MessageType } from '../models/message-type';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
- 
 
   config = new ConfigService();
   authenticated = false;
@@ -78,6 +78,10 @@ export class UserService {
     return this.httpClient.post(this.config.CHATROOM_CTRL + "add/",JSON.stringify(newGroup),this.config.httpOptions);
   }
 
+  delete_group(g: Chatroom) {
+    return this.httpClient.delete(this.config.CHATROOM_CTRL + g.id,this.config.httpOptions);
+  }
+ 
   send_message(message: Message)
   {
     if(message.chatroom!=null){
@@ -94,13 +98,18 @@ export class UserService {
   }
   send_group_message(message: Message)
   {
-    // console.log("send-group-message(message: Message)");
+    console.log("send-group-message(message: Message)");
     return this.httpClient.post(this.config.GROUP_MESSAGE_CTRL + "send/" + message.chatroom.id,JSON.stringify(message),this.config.httpOptions)
   }
 
   add_user_to_group(contact:User, group: Chatroom)
   {
     return this.httpClient.post(this.config.CHATROOM_CTRL + group.id + "/add-user/" + contact.id,{},this.config.httpOptions);
+  }
+
+  remove_user_from_group(contact:User, group: Chatroom)
+  {
+    return this.httpClient.post(this.config.CHATROOM_CTRL + group.id + "/remove-user/" + contact.id,{},this.config.httpOptions);
   }
 
   all_users_from_group(group: Chatroom)
